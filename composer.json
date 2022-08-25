@@ -1,0 +1,18 @@
+{
+    "name": "irealworlds/laravel-netopia",
+    "description": "A fluent interface for interacting with Netopia's services.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Irealworlds\\Netopia\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marin Călin",
+            "email": "marincalin2551@hotmail.com"
+        }
+    ],
+    "require": {}
+}
