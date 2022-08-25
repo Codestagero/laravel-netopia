@@ -1,2 +1,6 @@
-/vendor/
-.idea
+vendor
+phpunit.dev.xml
+.phpunit.result.cache
+/.idea
+/.vscode
+.php-cs-fixer.cache
