@@ -14,8 +14,6 @@ use Netopia\Payment\Address;
  */
 trait Billable
 {
-    use HasAddress;
-
     /**
      * Create a new payment for this model.
      *
@@ -23,7 +21,7 @@ trait Billable
      * @return PaymentRequest<TBillable>
      */
     public function createPayment(
-        #[ArrayShape(['description' => 'string', 'amount' => 'float', 'currency' => 'string'])]
+        #[ArrayShape(['description' => 'string', 'amount' => 'float', 'currency' => 'string', 'address' => '\Codestage\Netopia\Entities\Address', 'billingAddress' => '\Codestage\Netopia\Entities\Address', 'shippingAddress' => '\Codestage\Netopia\Entities\Address'])]
         array $options = []
     ): PaymentRequest {
         // Create a new payment entity
@@ -42,6 +40,21 @@ trait Billable
         // Fill the currency, if provided
         if (isset($options['currency'])) {
             $payment->setCurrency($options['currency']);
+        }
+
+        // Fill both address, if provided
+        if (isset($options['address'])) {
+            $payment->setAddress($options['address']);
+        }
+
+        // Fill the address, if provided
+        if (isset($options['billingAddress'])) {
+            $payment->setBillingAddress($options['billingAddress']);
+        }
+
+        // Fill the address, if provided
+        if (isset($options['shippingAddress'])) {
+            $payment->setShippingAddress($options['shippingAddress']);
         }
 
         // Return the created payment

@@ -3,7 +3,7 @@
 namespace Codestage\Netopia\Services;
 
 use Codestage\Netopia\Contracts\PaymentService;
-use Codestage\Netopia\Entities\EncryptedPayment;
+use Codestage\Netopia\Entities\{Address, EncryptedPayment};
 use Codestage\Netopia\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\{Config};
@@ -38,14 +38,14 @@ class DefaultPaymentService extends PaymentService
         $paymentRequest->invoice->tokenId = null;
         $paymentRequest->invoice->details = $payment->description;
 
-        $billable = $payment->billable();
-
-        if (method_exists($billable, 'netopiaAddress')) {
+        if ($payment->billing_address instanceof Address) {
             // Billing Info
-            $paymentRequest->invoice->setBillingAddress($billable->netopiaAddress());
+            $paymentRequest->invoice->setBillingAddress($payment->billing_address->toNetopia());
+        }
 
-            // Shipping
-            $paymentRequest->invoice->setShippingAddress($billable->netopiaAddress());
+        if ($payment->shipping_address instanceof Address) {
+            // Shipping Info
+            $paymentRequest->invoice->setShippingAddress($payment->shipping_address->toNetopia());
         }
 
         // encrypting

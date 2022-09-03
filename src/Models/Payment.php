@@ -4,9 +4,10 @@ namespace Codestage\Netopia\Models;
 
 use Carbon\Carbon;
 use Codestage\Netopia\Contracts\PaymentService;
-use Codestage\Netopia\Entities\EncryptedPayment;
+use Codestage\Netopia\Entities\{Address, EncryptedPayment};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\App;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
  * @property    float           $amount
  * @property    string          $currency
  * @property    string|null     $description
+ * @property    Address|null    $shipping_address
+ * @property    Address|null    $billing_address
  * @property    Carbon          $createdAt
  * @property    Carbon          $updatedAt
  */
@@ -45,7 +48,7 @@ class Payment extends Model
         'status',
         'amount',
         'currency',
-        'description'
+        'description',
     ];
 
     /**
@@ -78,6 +81,32 @@ class Payment extends Model
     }
 
     /**
+     * Interact with the payment's billing address.
+     *
+     * @return Attribute
+     */
+    protected function billingAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): Address|null => json_decode($value),
+            set: fn (Address|null $value): string => json_encode($value),
+        );
+    }
+
+    /**
+     * Interact with the payment's shipping address.
+     *
+     * @return Attribute
+     */
+    protected function shippingAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): Address|null => json_decode($value),
+            set: fn (Address|null $value): string => json_encode($value),
+        );
+    }
+
+    /**
      * Get the billable entity that executed this payment.
      *
      * @return MorphTo
@@ -97,6 +126,7 @@ class Payment extends Model
     {
         /** @var PaymentService $paymentService */
         $paymentService = App::make(PaymentService::class);
+
         return $paymentService->generateEncryptedPayment($this);
     }
 }

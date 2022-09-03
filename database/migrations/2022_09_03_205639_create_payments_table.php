@@ -14,6 +14,8 @@ return new class extends Migration {
             $table->string('currency', 6);
             $table->text('description')->nullable()->default(null);
             $table->nullableMorphs('billable');
+            $table->json('shipping_address')->default(json_encode(null));
+            $table->json('billing_address')->default(json_encode(null));
             $table->timestamps();
         });
     }

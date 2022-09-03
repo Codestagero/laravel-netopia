@@ -40,6 +40,20 @@ class PaymentRequest
     public mixed $billable;
 
     /**
+     * The address assigned to this payment.
+     *
+     * @var Address
+     */
+    public Address $billingAddress;
+
+    /**
+     * The shipping assigned to this payment.
+     *
+     * @var Address
+     */
+    public Address $shippingAddress;
+
+    /**
      * Payment constructor method.
      *
      * @param TBillable $billable
@@ -90,6 +104,46 @@ class PaymentRequest
     }
 
     /**
+     * Set both the shipping and billing addresses used for this payment.
+     *
+     * @param Address $address
+     * @return $this
+     */
+    public function setAddress(Address $address): static
+    {
+        $this->shippingAddress = $address;
+        $this->billingAddress = $address;
+
+        return $this;
+    }
+
+    /**
+     * Set the address used for this payment.
+     *
+     * @param Address $billingAddress
+     * @return $this
+     */
+    public function setBillingAddress(Address $billingAddress): static
+    {
+        $this->billingAddress = $billingAddress;
+
+        return $this;
+    }
+
+    /**
+     * Set the address used for this payment.
+     *
+     * @param Address $billingAddress
+     * @return $this
+     */
+    public function setShippingAddress(Address $billingAddress): static
+    {
+        $this->billingAddress = $billingAddress;
+
+        return $this;
+    }
+
+    /**
      * Commit this payment to the database.
      *
      * @throws Throwable
@@ -104,6 +158,7 @@ class PaymentRequest
             'description' => $this->description,
         ]);
         $payment->billable()->associate($this->billable);
+        $payment->address = $this->billingAddress;
         $payment->saveOrFail();
 
         return $payment;
