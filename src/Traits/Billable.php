@@ -5,6 +5,7 @@ namespace Codestage\Netopia\Traits;
 use Codestage\Netopia\Entities\PaymentRequest;
 use Codestage\Netopia\Models\Payment;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use JetBrains\PhpStorm\ArrayShape;
 use Netopia\Payment\Address;
 
 /**
@@ -21,8 +22,10 @@ trait Billable
      * @param array<string, string|float|int|Address> $options
      * @return PaymentRequest<TBillable>
      */
-    public function createPayment(array $options = []): PaymentRequest
-    {
+    public function createPayment(
+        #[ArrayShape(['description' => 'string', 'amount' => 'float', 'currency' => 'string'])]
+        array $options = []
+    ): PaymentRequest {
         // Create a new payment entity
         $payment = new PaymentRequest($this);
 
