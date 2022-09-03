@@ -42,16 +42,16 @@ class PaymentRequest
     /**
      * The address assigned to this payment.
      *
-     * @var Address
+     * @var Address|null
      */
-    public Address $billingAddress;
+    public Address|null $billingAddress = null;
 
     /**
      * The shipping assigned to this payment.
      *
-     * @var Address
+     * @var Address|null
      */
-    public Address $shippingAddress;
+    public Address|null $shippingAddress = null;
 
     /**
      * Payment constructor method.
@@ -106,10 +106,10 @@ class PaymentRequest
     /**
      * Set both the shipping and billing addresses used for this payment.
      *
-     * @param Address $address
+     * @param Address|null $address
      * @return $this
      */
-    public function setAddress(Address $address): static
+    public function setAddress(Address|null $address): static
     {
         $this->shippingAddress = $address;
         $this->billingAddress = $address;
@@ -120,10 +120,10 @@ class PaymentRequest
     /**
      * Set the address used for this payment.
      *
-     * @param Address $billingAddress
+     * @param Address|null $billingAddress
      * @return $this
      */
-    public function setBillingAddress(Address $billingAddress): static
+    public function setBillingAddress(Address|null $billingAddress): static
     {
         $this->billingAddress = $billingAddress;
 
@@ -133,10 +133,10 @@ class PaymentRequest
     /**
      * Set the address used for this payment.
      *
-     * @param Address $billingAddress
+     * @param Address|null $billingAddress
      * @return $this
      */
-    public function setShippingAddress(Address $billingAddress): static
+    public function setShippingAddress(Address|null $billingAddress): static
     {
         $this->billingAddress = $billingAddress;
 
@@ -158,7 +158,8 @@ class PaymentRequest
             'description' => $this->description,
         ]);
         $payment->billable()->associate($this->billable);
-        $payment->address = $this->billingAddress;
+        $payment->billing_address = $this->billingAddress;
+        $payment->shipping_address = $this->shippingAddress;
         $payment->saveOrFail();
 
         return $payment;
