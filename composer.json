@@ -26,7 +26,10 @@
         "orchestra/testbench": "^7.6"
     },
     "require": {
-        "illuminate/support": "^9.26"
+        "illuminate/support": "^9.26",
+        "netopia/payment": "^1.0",
+        "illuminate/http": "^9.26",
+        "guzzlehttp/guzzle": "^7.4"
     },
     "extra": {
         "laravel": {
