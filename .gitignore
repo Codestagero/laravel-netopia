@@ -4,4 +4,5 @@ phpunit.dev.xml
 /.idea
 /.vscode
 .php-cs-fixer.cache
-certificates
+certificates/*_private.key
+certificates/*_public.cer

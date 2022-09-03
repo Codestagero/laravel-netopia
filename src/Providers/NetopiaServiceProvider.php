@@ -27,6 +27,7 @@ class NetopiaServiceProvider extends ServiceProvider
         // Publish configuration
         $this->publishes([
             __DIR__ . '/../../config/netopia.php' => $this->app->configPath('netopia.php'),
+            __DIR__ . '/../../certificates' => $this->app->basePath('certificates'),
         ]);
 
         // Merge configuration
