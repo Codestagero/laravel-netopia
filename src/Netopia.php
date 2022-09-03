@@ -1,6 +1,6 @@
 <?php
 
-namespace iRealWorlds\Netopia;
+namespace Codestage\Netopia;
 
 class Netopia
 {

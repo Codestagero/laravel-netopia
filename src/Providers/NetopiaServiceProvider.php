@@ -1,10 +1,10 @@
 <?php
 
-namespace iRealWorlds\Netopia\Providers;
+namespace Codestage\Netopia\Providers;
 
+use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Services\DefaultPaymentService;
 use Illuminate\Support\ServiceProvider;
-use iRealWorlds\Netopia\Contracts\PaymentService;
-use iRealWorlds\Netopia\Services\DefaultPaymentService;
 
 class NetopiaServiceProvider extends ServiceProvider
 {

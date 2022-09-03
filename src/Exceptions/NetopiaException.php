@@ -1,9 +1,9 @@
 <?php
 
-namespace iRealWorlds\Netopia\Exceptions;
+namespace Codestage\Netopia\Exceptions;
 
+use Codestage\Netopia\Enums\ExceptionCode;
 use Exception;
-use iRealWorlds\Netopia\Enums\ExceptionCode;
 
 class NetopiaException extends Exception
 {

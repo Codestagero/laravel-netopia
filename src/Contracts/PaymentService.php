@@ -1,9 +1,9 @@
 <?php
 
-namespace iRealWorlds\Netopia\Contracts;
+namespace Codestage\Netopia\Contracts;
 
+use Codestage\Netopia\Entities\PaymentRequest;
 use Exception;
-use iRealWorlds\Netopia\Entities\PaymentRequest;
 
 /**
  * @template TBillable

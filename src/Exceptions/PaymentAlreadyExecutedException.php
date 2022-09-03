@@ -1,6 +1,6 @@
 <?php
 
-namespace iRealWorlds\Netopia\Exceptions;
+namespace Codestage\Netopia\Exceptions;
 
 use Exception;
 

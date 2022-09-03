@@ -1,16 +1,16 @@
 {
-    "name": "irealworlds/laravel-netopia",
+    "name": "codestage/laravel-netopia",
     "description": "A fluent interface for interacting with Netopia's services.",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "iRealWorlds\\Netopia\\": "src/"
+            "Codestage\\Netopia\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "iRealWorlds\\Netopia\\Tests\\": "tests/"
+            "Codestage\\Netopia\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -34,7 +34,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "\\iRealWorlds\\Netopia\\Providers\\NetopiaServiceProvider"
+                "\\Codestage\\Netopia\\Providers\\NetopiaServiceProvider"
             ]
         }
     }

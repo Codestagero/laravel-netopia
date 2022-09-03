@@ -1,8 +1,8 @@
 <?php
 
-namespace iRealWorlds\Netopia\Traits;
+namespace Codestage\Netopia\Traits;
 
-use iRealWorlds\Netopia\Entities\PaymentRequest;
+use Codestage\Netopia\Entities\PaymentRequest;
 use Netopia\Payment\Address;
 
 /**

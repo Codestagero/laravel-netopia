@@ -1,9 +1,10 @@
 <?php
 
-namespace iRealWorlds\Netopia\Contracts;
+namespace Codestage\Netopia\Contracts;
 
 use Illuminate\Contracts\Config\Repository as ConfigurationRepository;
 use Illuminate\Support\Collection;
+use function is_array;
 
 abstract class NetopiaService
 {
@@ -43,7 +44,7 @@ abstract class NetopiaService
     public function buildUrl(string|array $segments, array $parameters = []): string
     {
         // Make sure the segments property is an array
-        if (!\is_array($segments)) {
+        if (!is_array($segments)) {
             $segments = [$segments];
         }
 

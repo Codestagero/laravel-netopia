@@ -1,12 +1,12 @@
 <?php
 
-namespace iRealWorlds\Netopia\Entities;
+namespace Codestage\Netopia\Entities;
 
+use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Exceptions\PaymentAlreadyExecutedException;
 use Exception;
 use Illuminate\Support\Facades\{App, Config};
 use Illuminate\Support\Str;
-use iRealWorlds\Netopia\Contracts\PaymentService;
-use iRealWorlds\Netopia\Exceptions\PaymentAlreadyExecutedException;
 use Netopia\Payment\Address;
 
 /**

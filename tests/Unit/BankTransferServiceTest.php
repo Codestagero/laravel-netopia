@@ -1,9 +1,9 @@
 <?php
 
-namespace iRealWorlds\Netopia\Tests\Unit;
+namespace Codestage\Netopia\Tests\Unit;
 
+use Codestage\Netopia\Tests\TestCase;
 use Exception;
-use iRealWorlds\Netopia\Tests\TestCase;
 
 /**
  * @coversNothing

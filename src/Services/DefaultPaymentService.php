@@ -1,12 +1,12 @@
 <?php
 
-namespace iRealWorlds\Netopia\Services;
+namespace Codestage\Netopia\Services;
 
+use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Entities\PaymentRequest;
 use Exception;
 use Illuminate\Support\Facades\{Config};
-use iRealWorlds\Netopia\Contracts\PaymentService;
-use iRealWorlds\Netopia\Entities\PaymentRequest;
-use Netopia\Payment\{Invoice};
+use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\Card;
 
 /**

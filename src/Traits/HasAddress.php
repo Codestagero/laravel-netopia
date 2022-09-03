@@ -1,8 +1,8 @@
 <?php
 
-namespace iRealWorlds\Netopia\Traits;
+namespace Codestage\Netopia\Traits;
 
-use iRealWorlds\Netopia\Enums\AddressType;
+use Codestage\Netopia\Enums\AddressType;
 use Netopia\Payment\Address;
 
 trait HasAddress

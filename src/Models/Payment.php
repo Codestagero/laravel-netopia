@@ -1,10 +1,10 @@
 <?php
 
-namespace iRealWorlds\Netopia\Models;
+namespace Codestage\Netopia\Models;
 
 use Carbon\Carbon;
+use Codestage\Netopia\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
-use iRealWorlds\Netopia\Enums\PaymentStatus;
 
 /**
  * @property    string          $id

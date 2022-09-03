@@ -1,9 +1,9 @@
 <?php
 
-namespace iRealWorlds\Netopia\Tests;
+namespace Codestage\Netopia\Tests;
 
+use Codestage\Netopia\Providers\NetopiaServiceProvider;
 use Illuminate\Support\Facades\Config;
-use iRealWorlds\Netopia\Providers\NetopiaServiceProvider;
 use Mockery;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 

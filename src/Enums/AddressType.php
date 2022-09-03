@@ -1,6 +1,6 @@
 <?php
 
-namespace iRealWorlds\Netopia\Enums;
+namespace Codestage\Netopia\Enums;
 
 enum AddressType: string
 {
