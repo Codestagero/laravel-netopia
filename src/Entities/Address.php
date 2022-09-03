@@ -7,6 +7,8 @@ use Illuminate\Contracts\Support\Jsonable;
 use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
 use Netopia\Payment\Address as NetopiaAddress;
+use function is_array;
+use function is_string;
 
 class Address implements Jsonable, JsonSerializable
 {
@@ -58,11 +60,15 @@ class Address implements Jsonable, JsonSerializable
      * @param array $initial Initial data that is to be assigned to the new entity.
      */
     public function __construct(
-        #[ArrayShape(['type' => '\Codestage\Netopia\Enums\AddressType|null', 'firstName' => 'string|null', 'lastName' => 'string|null', 'address' => 'string|null', 'email' => 'string|null', 'phoneNumber' => 'string|null'])]
+        #[ArrayShape(['type' => '\Codestage\Netopia\Enums\AddressType|string|null', 'firstName' => 'string|null', 'lastName' => 'string|null', 'address' => 'string|null', 'email' => 'string|null', 'phoneNumber' => 'string|null'])]
         array $initial = []
     ) {
         if (isset($initial['type'])) {
-            $this->type = $initial['type'];
+            if (is_string($initial['type'])) {
+                $this->type = AddressType::tryFrom($initial['type']);
+            } else {
+                $this->type = $initial['type'];
+            }
         }
 
         if (isset($initial['firstName'])) {
@@ -103,6 +109,23 @@ class Address implements Jsonable, JsonSerializable
             'email' => $this->email,
             'phoneNumber' => $this->phoneNumber,
         ];
+    }
+
+    /**
+     * Specify data which should be deserialized from JSON.
+     *
+     * @return Address|null data which can be deserialized from the JSON representation.
+     */
+    #[ArrayShape(['type' => 'mixed', 'firstName' => 'mixed', 'lastName' => 'mixed', 'address' => 'mixed', 'email' => 'mixed', 'phoneNumber' => 'mixed'])]
+    public static function jsonDeserialize(string $json): self|null
+    {
+        $decoded = json_decode($json, true);
+
+        if (is_array($decoded)) {
+            return new self($decoded);
+        } else {
+            return null;
+        }
     }
 
     /**

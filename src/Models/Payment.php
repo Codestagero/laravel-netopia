@@ -88,7 +88,7 @@ class Payment extends Model
     protected function billingAddress(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value): Address|null => json_decode($value),
+            get: fn (string $value): Address|null => Address::jsonDeserialize($value),
             set: fn (Address|null $value): string => json_encode($value),
         );
     }
@@ -101,7 +101,7 @@ class Payment extends Model
     protected function shippingAddress(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value): Address|null => json_decode($value),
+            get: fn (string $value): Address|null => Address::jsonDeserialize($value),
             set: fn (Address|null $value): string => json_encode($value),
         );
     }
