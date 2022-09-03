@@ -2,7 +2,8 @@
 
 namespace Codestage\Netopia\Contracts;
 
-use Codestage\Netopia\Entities\PaymentRequest;
+use Codestage\Netopia\Entities\EncryptedPayment;
+use Codestage\Netopia\Models\Payment;
 use Exception;
 
 /**
@@ -13,9 +14,9 @@ abstract class PaymentService extends NetopiaService
     /**
      * Execute a Netopia payment.
      *
-     * @param PaymentRequest<TBillable> $payment
+     * @param Payment $payment
      * @throws Exception
-     * @return string
+     * @return EncryptedPayment
      */
-    public abstract function generatePaymentUri(PaymentRequest $payment): string;
+    public abstract function generateEncryptedPayment(Payment $payment): EncryptedPayment;
 }

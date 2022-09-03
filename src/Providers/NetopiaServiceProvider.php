@@ -40,5 +40,8 @@ class NetopiaServiceProvider extends ServiceProvider
 
         // Register migrations
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+
+        // Register routes
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/netopia.php');
     }
 }

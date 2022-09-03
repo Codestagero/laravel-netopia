@@ -2,25 +2,15 @@
 
 namespace Codestage\Netopia\Entities;
 
-use Codestage\Netopia\Contracts\PaymentService;
-use Codestage\Netopia\Exceptions\PaymentAlreadyExecutedException;
-use Exception;
-use Illuminate\Support\Facades\{App, Config};
-use Illuminate\Support\Str;
-use Netopia\Payment\Address;
+use Codestage\Netopia\Models\Payment;
+use Illuminate\Support\Facades\{Config};
+use Throwable;
 
 /**
  * @template TBillable of Illuminate\Database\Eloquent\Model
  */
 class PaymentRequest
 {
-    /**
-     * This payment's generated id.
-     *
-     * @var string
-     */
-    public readonly string $id;
-
     /**
      * The amount of this payment.
      *
@@ -50,20 +40,6 @@ class PaymentRequest
     public mixed $billable;
 
     /**
-     * The Netopia address used for this payment.
-     *
-     * @var Address
-     */
-    public Address $address;
-
-    /**
-     * Whether this payment has already been executed.
-     *
-     * @var bool
-     */
-    private bool $wasExecuted = false;
-
-    /**
      * Payment constructor method.
      *
      * @param TBillable $billable
@@ -71,13 +47,7 @@ class PaymentRequest
     public function __construct(mixed $billable)
     {
         $this->billable = $billable;
-
-        if (method_exists($billable, 'netopiaAddress')) {
-            $this->address = $billable->netopiaAddress();
-        }
-
         $this->currency = Config::get('netopia.currency');
-        $this->id = 'payment_' . Str::uuid();
     }
 
     /**
@@ -120,40 +90,22 @@ class PaymentRequest
     }
 
     /**
-     * Set the address used for this payment.
+     * Commit this payment to the database.
      *
-     * @param Address $address
-     * @return $this
+     * @throws Throwable
+     * @return Payment
      */
-    public function setAddress(Address $address): static
+    public function save(): Payment
     {
-        $this->address = $address;
+        /** @var Payment $payment */
+        $payment = Payment::query()->make([
+            'amount' => $this->amount,
+            'currency' => $this->currency,
+            'description' => $this->description,
+        ]);
+        $payment->billable()->associate($this->billable);
+        $payment->saveOrFail();
 
-        return $this;
-    }
-
-    /**
-     * Execute this payment as a bank transfer.
-     *
-     * @throws Exception
-     * @return string
-     */
-    public function generateUri(): string
-    {
-        // If this payment has already been executed, throw an exception
-        if ($this->wasExecuted) {
-            throw new PaymentAlreadyExecutedException();
-        }
-
-        // Execute this payment
-        /** @var PaymentService<TBillable> $bankTransferService */
-        $bankTransferService = App::make(PaymentService::class);
-        $result = $bankTransferService->generatePaymentUri($this);
-
-        // Mark that this payment has already been executed.
-        $this->wasExecuted = true;
-
-        // Return the payment's result
-        return $result;
+        return $payment;
     }
 }
