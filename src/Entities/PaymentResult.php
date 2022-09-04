@@ -18,12 +18,14 @@ class PaymentResult
      *
      * @param PaymentStatus $newStatus
      * @param int $errorCode
+     * @param int $errorType
      * @param string $errorText
      */
-    public function __construct(PaymentStatus $newStatus, int $errorCode = 0, string $errorText = '')
+    public function __construct(PaymentStatus $newStatus, int $errorCode = 0, int $errorType = PaymentAbstract::CONFIRM_ERROR_TYPE_NONE, string $errorText = '')
     {
         $this->newStatus = $newStatus;
         $this->errorCode = $errorCode;
         $this->errorText = $errorText;
+        $this->errorType = $errorType;
     }
 }
