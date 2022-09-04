@@ -7,7 +7,7 @@ use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
 use Exception;
-use Illuminate\Support\Facades\{Config, URL};
+use Illuminate\Support\Facades\{Config, URL, Log};
 use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\{Card, PaymentAbstract};
 
@@ -74,6 +74,13 @@ class DefaultPaymentService extends PaymentService
     public function decryptPayment(string $environment, string $data): PaymentResult
     {
         $paymentData = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
+
+        Log::debug("Decrypted payment", [
+            'payment' => $paymentData,
+            'notify' => $paymentData->objPmNotify,
+            'errorCode' => $paymentData->objPmNotify->errorCode,
+            'action' => $paymentData->objPmNotify->action
+        ]);
 
         if ($paymentData->objPmNotify->errorCode === 0) {
             $status = match ($paymentData->objPmNotify->action) {
