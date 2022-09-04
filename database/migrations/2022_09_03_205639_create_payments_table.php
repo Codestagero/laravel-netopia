@@ -10,7 +10,7 @@ return new class extends Migration {
     {
         Schema::create('netopia_payments', function (Blueprint $table): void {
             $table->string('id')->primary();
-            $table->string('status')->default(PaymentStatus::Pending->value);
+            $table->string('status')->default(PaymentStatus::NotStarted->value);
             $table->decimal('amount');
             $table->string('currency', 6);
             $table->text('description')->nullable()->default(null);
