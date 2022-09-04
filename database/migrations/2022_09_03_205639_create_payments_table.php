@@ -1,5 +1,6 @@
 <?php
 
+use Codestage\Netopia\Enums\PaymentStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,7 +10,7 @@ return new class extends Migration {
     {
         Schema::create('netopia_payments', function (Blueprint $table): void {
             $table->string('id')->primary();
-            $table->string('status');
+            $table->string('status')->default(PaymentStatus::Pending);
             $table->decimal('amount');
             $table->string('currency', 6);
             $table->text('description')->nullable()->default(null);

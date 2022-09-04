@@ -1,6 +1,6 @@
 <?php
 
-namespace Codestage\Netopia\Http;
+namespace Codestage\Netopia\Http\Controllers;
 
 use Codestage\Netopia\Models\Payment;
 use Exception;
