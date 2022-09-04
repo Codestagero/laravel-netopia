@@ -3,6 +3,6 @@
     <crc>{{ $result->errorText }}</crc>
 @else
     <crc error_type="{{ $result->errorType }}" error_code="{{ $result->errorCode }}">
-        {{ $result->errorMessage }}
+        {{ $result->errorText }}
     </crc>
 @endif
