@@ -5,7 +5,7 @@ namespace Codestage\Netopia\Http\Controllers;
 use Codestage\Netopia\Contracts\PaymentService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\{Log, Response};
 
 class PaymentReturnController
 {
@@ -21,6 +21,12 @@ class PaymentReturnController
     {
         $payment = $paymentService->decryptPayment($request->get('env_key'), $request->get('data'));
 
-        return Response::noContent();
+        Log::debug('Received IPN', [$request->get('env_key'), $request->get('data')]);
+
+        return Response::view('netopia::payment_result', [
+            'result' => $payment
+        ])->withHeaders([
+            'Content-Type' => 'application/xml'
+        ]);
     }
 }

@@ -87,6 +87,6 @@ class DefaultPaymentService extends PaymentService
             $status = PaymentStatus::Rejected;
         }
 
-        return new PaymentResult($status);
+        return new PaymentResult($status, $paymentRequestIpn->objPmNotify->errorCode, $paymentRequestIpn->objPmNotify->errorMessage);
     }
 }
