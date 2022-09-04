@@ -14,15 +14,13 @@
             Payment complete
         </h1>
 
-        <p class="mt-4 text-gray-500 text-sm">
-            You have successfully completed the payment.
-            You can now safely close this tab
+        <div class="mt-4 text-gray-500 text-sm">
+        <p>
+            You have successfully completed a payment on the Netopia portal.
         </p>
-
-        <div class="flex items-center justify-center mt-7">
-            <button class="rounded-lg px-4 py-2 hover:bg-gray-900 bg-gray-800 text-gray-100" onclick="window.close()">
-                Close window
-            </button>
+        <p>
+            You can now safely close this tab.
+        </p>
         </div>
     </div>
 </body>
