@@ -73,7 +73,7 @@ class DefaultPaymentService extends PaymentService
      */
     public function decryptPayment(string $environment, string $data): PaymentResult
     {
-        $paymentRequestIpn = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->certificatePath);
+        $paymentRequestIpn = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
 
         if ($paymentRequestIpn->objPmNotify->errorCode === 0) {
             $status = match ($paymentRequestIpn->objPmNotify->action) {

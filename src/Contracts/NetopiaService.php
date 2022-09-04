@@ -14,11 +14,18 @@ abstract class NetopiaService
     protected string $baseUrl;
 
     /**
-     * The path to the public certificate path.
+     * The path to the public certificate .
      *
      * @var mixed
      */
     protected mixed $certificatePath;
+
+    /**
+     * The path to the secret key.
+     *
+     * @var mixed
+     */
+    protected mixed $secretKeyPath;
 
     /**
      * NetopiaService constructor method.
@@ -30,5 +37,6 @@ abstract class NetopiaService
             default => 'https://secure.mobilpay.ro',
         };
         $this->certificatePath = $configuration->get('netopia.certificate_path.public');
+        $this->secretKeyPath = $configuration->get('netopia.certificate_path.secret');
     }
 }
