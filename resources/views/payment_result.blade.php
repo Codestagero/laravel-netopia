@@ -1,4 +1,4 @@
-{{ '<?xml version="1.0" encoding="utf-8"?>' }}
+{!! '<?xml version="1.0" encoding="utf-8"?>' !!}
 @if($result->errorCode === 0)
     <crc>{{ $result->errorText }}</crc>
 @else
