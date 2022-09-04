@@ -73,10 +73,10 @@ class DefaultPaymentService extends PaymentService
      */
     public function decryptPayment(string $environment, string $data): PaymentResult
     {
-        $paymentRequestIpn = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
+        $paymentData = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
 
-        if ($paymentRequestIpn->objPmNotify->errorCode === 0) {
-            $status = match ($paymentRequestIpn->objPmNotify->action) {
+        if ($paymentData->objPmNotify->errorCode === 0) {
+            $status = match ($paymentData->objPmNotify->action) {
                 'confirmed' => PaymentStatus::Confirmed,
                 'paid_pending', 'confirmed_pending' => PaymentStatus::Pending,
                 'paid' => PaymentStatus::Preauthorized,
@@ -87,6 +87,12 @@ class DefaultPaymentService extends PaymentService
             $status = PaymentStatus::Rejected;
         }
 
-        return new PaymentResult($status, errorCode: $paymentRequestIpn->objPmNotify->errorCode, errorText: $paymentRequestIpn->objPmNotify->errorMessage);
+        return new PaymentResult([
+            'newStatus' => $status,
+            'paymentId' => $paymentData->orderId,
+            'transactionReference' => $paymentData->objPmNotify->rrn,
+            'errorCode' => $paymentData->objPmNotify->errorCode,
+            'errorText' => $paymentData->objPmNotify->errorMessage
+        ]);
     }
 }

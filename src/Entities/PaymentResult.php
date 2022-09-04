@@ -2,30 +2,86 @@
 
 namespace Codestage\Netopia\Entities;
 
-use Codestage\Netopia\Enums\PaymentStatus;
+use Codestage\Netopia\Enums\{ExceptionCode, PaymentStatus};
 use Netopia\Payment\Request\PaymentAbstract;
 
 class PaymentResult
 {
-    public PaymentStatus $newStatus;
+    /**
+     * The updated payment status.
+     *
+     * @var PaymentStatus|null
+     */
+    public PaymentStatus|null $newStatus = null;
 
+    /**
+     * The type of error that resulted.
+     *
+     * @var int
+     */
     public int $errorType = PaymentAbstract::CONFIRM_ERROR_TYPE_NONE;
-    public int $errorCode = 0;
+
+    /**
+     * The resulting error's code.
+     *
+     * @var ExceptionCode
+     */
+    public ExceptionCode $errorCode = ExceptionCode::Approved;
+
+    /**
+     * The text body of the error that resulted.
+     *
+     * @var string
+     */
     public string $errorText = '';
+
+    /**
+     * The Id of the payment this result is associated to.
+     *
+     * @var string|null
+     */
+    public string|null $paymentId = null;
+
+    /**
+     * The transaction reference number for this payment.
+     *
+     * @var string|null
+     */
+    public string|null $transactionReference = null;
 
     /**
      * PaymentResult constructor method.
      *
-     * @param PaymentStatus $newStatus
-     * @param int $errorCode
-     * @param int $errorType
-     * @param string $errorText
+     * @param array $initial
      */
-    public function __construct(PaymentStatus $newStatus, int $errorCode = 0, int $errorType = PaymentAbstract::CONFIRM_ERROR_TYPE_NONE, string $errorText = '')
+    public function __construct(array $initial = [])
     {
-        $this->newStatus = $newStatus;
-        $this->errorCode = $errorCode;
-        $this->errorText = $errorText;
-        $this->errorType = $errorType;
+        if (isset($initial['newStatus'])) {
+            $this->newStatus = $initial['newStatus'];
+        }
+
+        if (isset($initial['errorCode'])) {
+            if (is_numeric($initial['errorCode'])) {
+                $this->errorCode = ExceptionCode::tryFrom($initial['errorCode']) ?? ExceptionCode::Approved;
+            } else if ($initial['errorCode'] instanceof ExceptionCode) {
+                $this->errorCode = $initial['errorCode'];
+            }
+        }
+
+        if (isset($initial['paymentId'])) {
+            $this->paymentId = $initial['paymentId'];
+        }
+
+        if (isset($initial['transactionReference'])) {
+            $this->transactionReference = $initial['transactionReference'];
+        }
+
+        if (isset($initial['errorText'])) {
+            $this->errorText = $initial['errorText'];
+        }
+
+        if (isset($initial['errorType'])) {
+            $this->errorType = $initial['errorType'];
+        }
     }
 }

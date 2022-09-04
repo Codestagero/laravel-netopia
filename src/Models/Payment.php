@@ -14,15 +14,15 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 /**
- * @property    string          $id
- * @property    PaymentStatus   $status
- * @property    float           $amount
- * @property    string          $currency
- * @property    string|null     $description
- * @property    Address|null    $shipping_address
- * @property    Address|null    $billing_address
- * @property    Carbon          $createdAt
- * @property    Carbon          $updatedAt
+ * @property-read   string          $id
+ * @property        PaymentStatus   $status
+ * @property        float           $amount
+ * @property        string          $currency
+ * @property        string|null     $description
+ * @property        Address|null    $shipping_address
+ * @property        Address|null    $billing_address
+ * @property        Carbon          $createdAt
+ * @property        Carbon          $updatedAt
  */
 class Payment extends Model
 {

@@ -3,9 +3,11 @@
 namespace Codestage\Netopia\Http\Controllers;
 
 use Codestage\Netopia\Contracts\PaymentService;
-use Exception;
+use Codestage\Netopia\Models\Payment;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{Request, Response as PlainResponse};
-use Illuminate\Support\Facades\{Log, Response};
+use Illuminate\Support\Facades\{Response};
+use Throwable;
 
 class PaymentReturnController
 {
@@ -24,17 +26,35 @@ class PaymentReturnController
      *
      * @param Request $request
      * @param PaymentService $paymentService
-     * @throws Exception
+     * @throws ModelNotFoundException
+     * @throws Throwable
      * @return PlainResponse
      */
     public function ipn(Request $request, PaymentService $paymentService): PlainResponse
     {
-        $payment = $paymentService->decryptPayment($request->get('env_key'), $request->get('data'));
+        // Decrypt the IPN data
+        $ipn = $paymentService->decryptPayment($request->get('env_key'), $request->get('data'));
 
-        Log::debug('Received IPN', [$request->get('env_key'), $request->get('data')]);
+        // If the IPN has no order id attached, no payment can be associated
+        if ($ipn->paymentId === null) {
+            throw new ModelNotFoundException();
+        }
 
+        // Find the payment this notification is for
+        /** @var Payment $payment */
+        $payment = Payment::query()->findOrFail($ipn->paymentId);
+
+        // Update the payment status
+        if ($ipn->newStatus !== null) {
+            $payment->status = $ipn->newStatus;
+        }
+
+        // Save the changes applied on the payment model
+        $payment->saveOrFail();
+
+        // Return a payment result XML
         return Response::view('netopia::payment_result', [
-            'result' => $payment
+            'result' => $ipn
         ])->withHeaders([
             'Content-Type' => 'application/xml'
         ]);
