@@ -2,7 +2,7 @@
 @if($result->errorCode === 0)
     <crc>{{ $result->errorText }}</crc>
 @else
-    <crc error_type="{{ $result->errorType }}" error_code="{{ $result->errorCode }}">
+    <crc error_type="{{ $result->errorType }}" error_code="{{ $result->errorCode->value }}">
         {{ $result->errorText }}
     </crc>
 @endif

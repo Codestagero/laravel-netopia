@@ -75,14 +75,7 @@ class DefaultPaymentService extends PaymentService
     {
         $paymentData = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
 
-        Log::debug("Decrypted payment", [
-            'payment' => $paymentData,
-            'notify' => $paymentData->objPmNotify,
-            'errorCode' => $paymentData->objPmNotify->errorCode,
-            'action' => $paymentData->objPmNotify->action
-        ]);
-
-        if ($paymentData->objPmNotify->errorCode === 0) {
+        if ((int) $paymentData->objPmNotify->errorCode === 0) {
             $status = match ($paymentData->objPmNotify->action) {
                 'confirmed' => PaymentStatus::Confirmed,
                 'paid_pending', 'confirmed_pending' => PaymentStatus::Pending,
@@ -93,6 +86,14 @@ class DefaultPaymentService extends PaymentService
         } else {
             $status = PaymentStatus::Rejected;
         }
+
+        Log::debug("Decrypted payment", [
+            'payment' => $paymentData,
+            'notify' => $paymentData->objPmNotify,
+            'errorCode' => $paymentData->objPmNotify->errorCode,
+            'action' => $paymentData->objPmNotify->action,
+            'status' => $status,
+        ]);
 
         return new PaymentResult([
             'newStatus' => $status,
