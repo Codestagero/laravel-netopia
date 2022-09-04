@@ -7,7 +7,7 @@ use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
 use Exception;
-use Illuminate\Support\Facades\{Config, URL, Log};
+use Illuminate\Support\Facades\{Config, Log, URL};
 use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\{Card, PaymentAbstract};
 
@@ -60,7 +60,7 @@ class DefaultPaymentService extends PaymentService
         $envKey = $paymentRequest->getEnvKey();
         $data = $paymentRequest->getEncData();
 
-        return new EncryptedPayment($this->baseUrl, $envKey, $data, );
+        return new EncryptedPayment($this->baseUrl . '/card4', $envKey, $data);
     }
 
     /**
@@ -87,7 +87,7 @@ class DefaultPaymentService extends PaymentService
             $status = PaymentStatus::Rejected;
         }
 
-        Log::debug("Decrypted payment", [
+        Log::debug('Decrypted payment', [
             'payment' => $paymentData,
             'notify' => $paymentData->objPmNotify,
             'errorCode' => $paymentData->objPmNotify->errorCode,
