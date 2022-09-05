@@ -50,6 +50,10 @@ class DefaultPaymentService extends PaymentService
             $paymentRequest->invoice->setShippingAddress($payment->shipping_address->toNetopia());
         }
 
+        Log::debug('Encrypted payment', [
+            $paymentRequest
+        ]);
+
         // encrypting
         $paymentRequest->encrypt($this->certificatePath);
 
