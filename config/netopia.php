@@ -1,5 +1,7 @@
 <?php
 
+use Codestage\Netopia\Enums\PaymentStatus;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -45,4 +47,18 @@ return [
     |
     */
     'currency' => env('NETOPIA_CURRENCY', 'EUR'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payable statuses
+    |--------------------------------------------------------------------------
+    |
+    | Payment statuses for which further action can be taken.
+    | If a user tries to execute a payment that has other type than these, a 403 Forbidden response will be returned
+    |
+    */
+    'payable_statuses' => [
+        PaymentStatus::NotStarted,
+        PaymentStatus::Rejected
+    ]
 ];
