@@ -7,7 +7,7 @@ use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
 use Exception;
-use Illuminate\Support\Facades\{Config, URL, Log};
+use Illuminate\Support\Facades\{Config, Log, URL};
 use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\{Card, PaymentAbstract};
 
@@ -31,6 +31,7 @@ class DefaultPaymentService extends PaymentService
         $paymentRequest->orderId = $payment->getKey(); // order_id should be unique for a merchant account
         $paymentRequest->confirmUrl = URL::route('netopia.ipn'); // is where mobilPay redirects the client once the payment process is finished and is MANDATORY
         $paymentRequest->returnUrl = URL::route('netopia.success'); // is where mobilPay will send the payment result and is MANDATORY
+        $paymentRequest->type = PaymentAbstract::PAYMENT_TYPE_CARD;
 
         // Invoices info
         $paymentRequest->invoice = new Invoice();
@@ -73,7 +74,7 @@ class DefaultPaymentService extends PaymentService
      */
     public function decryptPayment(string $environment, string $data): PaymentResult
     {
-        $paymentData = PaymentAbstract::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
+        $paymentData = Card::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
 
         if ((int) $paymentData->objPmNotify->errorCode === 0) {
             $status = match ($paymentData->objPmNotify->action) {
@@ -87,7 +88,7 @@ class DefaultPaymentService extends PaymentService
             $status = PaymentStatus::Rejected;
         }
 
-        Log::debug("Decrypted payment", [
+        Log::debug('Decrypted payment', [
             'payment' => $paymentData,
             'notify' => $paymentData->objPmNotify,
             'errorCode' => $paymentData->objPmNotify->errorCode,
