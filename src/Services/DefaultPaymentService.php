@@ -17,6 +17,7 @@ use Netopia\Payment\Request\{Card, PaymentAbstract};
 use SoapClient;
 use SoapFault;
 use stdClass;
+use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -128,7 +129,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -219,7 +220,7 @@ class DefaultPaymentService extends PaymentService
         $order->description = $payment->description; //payment descriptor
         $order->amount = $payment->amount; // order amount; decimals present only when necessary, i.e. 15 not 15.00
 
-        if ($order->amount - (int) $order->amount) {
+        if ($order->amount - (int) $order->amount <= 0) {
             $order->amount = (int) $order->amount;
         }
 
