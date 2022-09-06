@@ -26,6 +26,7 @@
         "orchestra/testbench": "^7.6"
     },
     "require": {
+        "ext-soap": "*",
         "illuminate/support": "^9.26",
         "netopia/payment": "^1.0",
         "illuminate/http": "^9.26",

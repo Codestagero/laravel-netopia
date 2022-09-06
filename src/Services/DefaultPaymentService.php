@@ -2,15 +2,21 @@
 
 namespace Codestage\Netopia\Services;
 
+use Carbon\Carbon;
 use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
+use Codestage\Netopia\Exceptions\{ConfigurationException, NetopiaException};
 use Codestage\Netopia\Models\Payment;
 use Codestage\Netopia\Traits\Billable;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\{Config, Log, URL};
 use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\{Card, PaymentAbstract};
+use SoapClient;
+use SoapFault;
+use stdClass;
 
 /**
  * @template TBillable
@@ -134,5 +140,113 @@ class DefaultPaymentService extends PaymentService
         }
 
         return null;
+    }
+
+    /**
+     * Execute a payment using SOAP.
+     *
+     * @param Payment $payment
+     * @throws SoapFault
+     * @throws ConfigurationException
+     * @throws NetopiaException
+     * @throws Exception
+     * @return mixed
+     */
+    public function soapPayment(Payment $payment): mixed
+    {
+        // Make sure that an account identifier has been configured
+        if (!Config::get('netopia.seller_account_identifier')) {
+            throw new ConfigurationException('Seller Account Identifier not configured!');
+        }
+
+        // Make sure that the billable entity has a valid token
+        /** @var Model|Billable $billable */
+        $billable = $payment->billable;
+
+        if (!$billable->netopia_token || ($billable->netopia_token_expires_at instanceof Carbon && $billable->netopia_token_expires_at->isPast())) {
+            throw new NetopiaException('The billable entity must have a valid associated token.');
+        }
+
+        // Create the SOAP client
+        $soap = new SoapClient(implode('/', [
+            $this->baseUrl,
+            'api',
+            'payment2',
+            '?wsdl'
+        ]), [
+            'cache_wsdl' => WSDL_CACHE_NONE
+        ]);
+
+        // Build the account object
+        $account = new stdClass();
+        $account->id = Config::get('netopia.seller_account_identifier');
+        $account->user_name = Config::get('app.name'); // please ask mobilPay to upgrade the necessary access required for token payments
+        $account->customer_ip = $_SERVER['REMOTE_ADDR']; // The buyer's IP address
+        $account->confirm_url = '<your_confirm_URL>';  // this is where mobilPay will send the payment result. This has priority over the SOAP call response
+
+        // Build the transaction object
+        $transaction = new stdClass();
+        $transaction->paymentToken = $billable->netopia_token;
+
+        // Build the billing address object
+        $billing = new stdClass();
+        $billing->country = 'billing_country';
+        $billing->county = 'billing_county';
+        $billing->city = 'billing_city';
+        $billing->address = 'billing_address';
+        $billing->postal_code = 'billing_postal_code';
+        $billing->first_name = 'billing_first_name';
+        $billing->last_name = 'billing_last_name';
+        $billing->phone = 'billing_phone';
+        $billing->email = 'email_address';
+
+        // Build the shipping address object
+        $shipping = new stdClass();
+        $shipping->country = 'shipping_country';
+        $shipping->county = 'shipping_county';
+        $shipping->city = 'shipping_city';
+        $shipping->address = 'shipping_address';
+        $shipping->postal_code = 'shipping_postal_code';
+        $shipping->first_name = 'shipping_first_name';
+        $shipping->last_name = 'shipping_last_name';
+        $shipping->phone = 'shipping_phone';
+        $shipping->email = 'shipping_email';
+
+        // Build the order object
+        $order = new stdClass();
+        $order->id = $payment->id; //your orderId. As with all mobilPay payments, it needs to be unique at seller account level
+        $order->description = $payment->description; //payment descriptor
+        $order->amount = $payment->amount; // order amount; decimals present only when necessary, i.e. 15 not 15.00
+        $order->currency = $payment->currency; //currency
+        $order->billing = $billing;
+        $order->shipping = $shipping;
+
+        // Build the HASH
+        $account->hash = mb_strtoupper(
+            sha1(mb_strtoupper(Config::get('netopia.account_password_hash')) . $order->id . $order->amount . $order->currency . $account->id)
+        );
+
+        // Build the request object
+        $req = new stdClass();
+        $req->account = $account;
+        $req->order = $order;
+        $req->params = new stdClass();
+        $req->transaction = $transaction;
+
+        try {
+            Log::debug('SOAP request', [$req]);
+
+            $response = $soap->doPayT(['request' => $req]);
+
+            Log::debug('SOAP response', [$response]);
+
+            if (isset($response->errors) && $response->errors->code !== 0x00) {
+                throw new Exception($response->code, $response->message);
+            }
+
+            return $response;
+        } catch(SoapFault $e) {
+            throw new Exception($e->faultstring);
+        }
     }
 }
