@@ -27,17 +27,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Seller Account Identifier
-    |--------------------------------------------------------------------------
-    |
-    | The merchant Seller Account Identifier (SAC).
-    | Available in your mobilPay account, under Admin - Seller accounts - Edit - Security settings.
-    |
-    */
-    'seller_account_identifier' => env('NETOPIA_SELLER_ACCOUNT_IDENTIFIER'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Account Password
     |--------------------------------------------------------------------------
     |
