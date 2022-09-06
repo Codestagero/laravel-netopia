@@ -182,7 +182,7 @@ class DefaultPaymentService extends PaymentService
         // Build the account object
         $account = new stdClass();
         $account->id = Config::get('netopia.signature');
-        $account->user_name = Config::get('app.name'); // please ask mobilPay to upgrade the necessary access required for token payments
+        $account->user_name = Config::get('netopia.username'); // please ask mobilPay to upgrade the necessary access required for token payments
         $account->customer_ip = '0.0.0.0'; // The buyer's IP address
         $account->confirm_url = URL::route('netopia.ipn');  // this is where mobilPay will send the payment result. This has priority over the SOAP call response
 
@@ -229,9 +229,7 @@ class DefaultPaymentService extends PaymentService
         $order->shipping = $shipping;
 
         // Build the HASH
-        $account->hash = mb_strtoupper(
-            sha1(mb_strtoupper(Config::get('netopia.account_password_hash')) . $order->id . $order->amount . $order->currency . $account->id)
-        );
+        $account->hash = mb_strtoupper(sha1(mb_strtoupper(md5(Config::get('netopia.account_password_hash'))) . "{$order->id}{$order->amount}{$order->currency}{$account->id}"));
 
         // Build the request object
         $req = new stdClass();
