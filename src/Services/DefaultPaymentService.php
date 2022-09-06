@@ -216,7 +216,7 @@ class DefaultPaymentService extends PaymentService
 
         // Build the order object
         $order = new stdClass();
-        $order->id = md5(uniqid(mt_rand())); //your orderId. As with all mobilPay payments, it needs to be unique at seller account level
+        $order->id = $payment->id; //your orderId. As with all mobilPay payments, it needs to be unique at seller account level
         $order->description = $payment->description; //payment descriptor
         $order->amount = $payment->amount; // order amount; decimals present only when necessary, i.e. 15 not 15.00
 
