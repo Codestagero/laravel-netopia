@@ -2,6 +2,7 @@
 
 namespace Codestage\Netopia\Entities;
 
+use Carbon\Carbon;
 use Codestage\Netopia\Enums\{ExceptionCode, PaymentStatus};
 use Netopia\Payment\Request\PaymentAbstract;
 
@@ -50,6 +51,20 @@ class PaymentResult
     public string|null $transactionReference = null;
 
     /**
+     * The billable entity token received in this result.
+     *
+     * @var string|null
+     */
+    public string|null $tokenId = null;
+
+    /**
+     * The expiration date of the billable token received in this result.
+     *
+     * @var Carbon|null
+     */
+    public Carbon|null $tokenExpiresAt = null;
+
+    /**
      * PaymentResult constructor method.
      *
      * @param array $initial
@@ -82,6 +97,18 @@ class PaymentResult
 
         if (isset($initial['errorType'])) {
             $this->errorType = $initial['errorType'];
+        }
+
+        if (isset($initial['tokenId'])) {
+            $this->tokenId = $initial['tokenId'];
+        }
+
+        if (isset($initial['tokenExpiresAt'])) {
+            if ($initial['tokenExpiresAt'] instanceof Carbon) {
+                $this->tokenExpiresAt = $initial['tokenExpiresAt'];
+            } else {
+                $this->tokenExpiresAt = Carbon::parse($initial['tokenExpiresAt']);
+            }
         }
     }
 }

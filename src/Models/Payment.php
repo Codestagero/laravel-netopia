@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
  * @property        Address|null    $billing_address
  * @property        Carbon          $createdAt
  * @property        Carbon          $updatedAt
+ * @property-read   Model           $billable
  */
 class Payment extends Model
 {

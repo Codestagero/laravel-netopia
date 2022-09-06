@@ -6,6 +6,7 @@ use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
+use Codestage\Netopia\Traits\Billable;
 use Exception;
 use Illuminate\Support\Facades\{Config, Log, URL};
 use Netopia\Payment\Invoice;
@@ -37,7 +38,7 @@ class DefaultPaymentService extends PaymentService
         $paymentRequest->invoice = new Invoice();
         $paymentRequest->invoice->currency = $payment->currency;
         $paymentRequest->invoice->amount = (string) $payment->amount;
-        $paymentRequest->invoice->tokenId = null;
+        $paymentRequest->invoice->tokenId = $this->extractPaymentBillableToken($payment);
         $paymentRequest->invoice->details = $payment->description;
 
         if ($payment->billing_address instanceof Address) {
@@ -105,7 +106,33 @@ class DefaultPaymentService extends PaymentService
             'paymentId' => $paymentData->orderId,
             'transactionReference' => $paymentData->objPmNotify->rrn,
             'errorCode' => $paymentData->objPmNotify->errorCode,
-            'errorText' => $paymentData->objPmNotify->errorMessage
+            'errorText' => $paymentData->objPmNotify->errorMessage,
+            'tokenId' => $paymentData->objPmNotify->token_id,
+            'tokenExpiresAt' => $paymentData->objPmNotify->token_expiration_date
         ]);
+    }
+
+    /**
+     * Extract the token id that matches this payment's billable entity.
+     *
+     * @param Payment $payment
+     * @return string|null
+     */
+    private function extractPaymentBillableToken(Payment $payment): string|null
+    {
+        if ($payment->billable) {
+            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+                /** @var Billable $billable */
+                $billable = $payment->billable;
+
+                if ($billable->netopia_token) {
+                    if (!$billable->netopia_token_expires_at || $billable->netopia_token_expires_at->isFuture()) {
+                        return $billable->netopia_token;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

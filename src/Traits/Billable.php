@@ -2,6 +2,7 @@
 
 namespace Codestage\Netopia\Traits;
 
+use Carbon\Carbon;
 use Codestage\Netopia\Entities\PaymentRequest;
 use Codestage\Netopia\Models\Payment;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,8 +10,12 @@ use JetBrains\PhpStorm\ArrayShape;
 use Netopia\Payment\Address;
 
 /**
- * @template TBillable of Illuminate\Database\Eloquent\Model
- * @method morphMany(string $class, string $string)
+ * A trait applied to entities that can be billed through Netopia.
+ *
+ * @template    TBillable of Illuminate\Database\Eloquent\Model
+ * @method      morphMany(string $class, string $string)
+ * @property    string|null      $netopia_token
+ * @property    Carbon|null      $netopia_token_expires_at
  */
 trait Billable
 {
