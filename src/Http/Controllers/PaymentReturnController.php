@@ -3,6 +3,7 @@
 namespace Codestage\Netopia\Http\Controllers;
 
 use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Events\PaymentStatusChangedEvent;
 use Codestage\Netopia\Models\Payment;
 use Codestage\Netopia\Traits\Billable;
 use Illuminate\Database\Eloquent\{Model, ModelNotFoundException};
@@ -44,6 +45,9 @@ class PaymentReturnController
         // Find the payment this notification is for
         /** @var Payment $payment */
         $payment = Payment::query()->findOrFail($ipn->paymentId);
+
+        // Emit the new status event
+        PaymentStatusChangedEvent::dispatchIf($ipn->newStatus !== null, $payment, $payment->status, $ipn->newStatus);
 
         // Update the payment status
         if ($ipn->newStatus !== null) {
