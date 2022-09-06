@@ -2,13 +2,19 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\{DB, Schema};
 
 return new class extends Migration {
     public function up(): void
     {
         Schema::table('netopia_payments', function (Blueprint $table): void {
-            $table->json('metadata');
+            $table->json('metadata')->nullable();
+        });
+        DB::table('netopia_payments')->whereNull('metadata')->update([
+            'metadata' => json_encode('null')
+        ]);
+        Schema::table('netopia_payments', function (Blueprint $table): void {
+            $table->json('metadata')->nullable(false)->change();
         });
     }
 
