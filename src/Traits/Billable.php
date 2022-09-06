@@ -5,6 +5,7 @@ namespace Codestage\Netopia\Traits;
 use Carbon\Carbon;
 use Codestage\Netopia\Entities\PaymentRequest;
 use Codestage\Netopia\Models\Payment;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use JetBrains\PhpStorm\ArrayShape;
 use Netopia\Payment\Address;
@@ -74,5 +75,18 @@ trait Billable
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'billable');
+    }
+
+    /**
+     * Interact with the billable entity's token expiration date.
+     *
+     * @return Attribute
+     */
+    protected function netopiaTokenExpiresAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string|null $value) => $value ? Carbon::parse($value) : null,
+            set: fn (Carbon|null $value) => $value?->toIso8601String(),
+        );
     }
 }
