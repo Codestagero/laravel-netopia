@@ -54,6 +54,13 @@ class PaymentRequest
     public Address|null $shippingAddress = null;
 
     /**
+     * The metadata assigned to this payment.
+     *
+     * @var PaymentMetadataItem[]
+     */
+    public array $metadata = [];
+
+    /**
      * Payment constructor method.
      *
      * @param TBillable $billable
@@ -144,6 +151,32 @@ class PaymentRequest
     }
 
     /**
+     * Set the metadata used for this payment.
+     *
+     * @param PaymentMetadataItem[] $metadata
+     * @return $this
+     */
+    public function setMetadata(array $metadata): static
+    {
+        $this->metadata = $metadata;
+
+        return $this;
+    }
+
+    /**
+     * Add an item to the metadata used for this payment.
+     *
+     * @param PaymentMetadataItem $metadata
+     * @return $this
+     */
+    public function addMetadata(PaymentMetadataItem $metadata): static
+    {
+        $this->metadata[] = $metadata;
+
+        return $this;
+    }
+
+    /**
      * Commit this payment to the database.
      *
      * @throws Throwable
@@ -160,6 +193,7 @@ class PaymentRequest
         $payment->billable()->associate($this->billable);
         $payment->billing_address = $this->billingAddress;
         $payment->shipping_address = $this->shippingAddress;
+        $payment->metadata = $this->metadata;
         $payment->saveOrFail();
 
         return $payment;
