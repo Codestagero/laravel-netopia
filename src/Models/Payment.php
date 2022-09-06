@@ -4,7 +4,7 @@ namespace Codestage\Netopia\Models;
 
 use Carbon\Carbon;
 use Codestage\Netopia\Contracts\PaymentService;
-use Codestage\Netopia\Entities\{Address, EncryptedPayment};
+use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentMetadataItem};
 use Codestage\Netopia\Enums\PaymentStatus;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,16 +14,17 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 /**
- * @property-read   string          $id
- * @property        PaymentStatus   $status
- * @property        float           $amount
- * @property        string          $currency
- * @property        string|null     $description
- * @property        Address|null    $shipping_address
- * @property        Address|null    $billing_address
- * @property        Carbon          $createdAt
- * @property        Carbon          $updatedAt
- * @property-read   Model           $billable
+ * @property-read   string                      $id
+ * @property        PaymentStatus               $status
+ * @property        float                       $amount
+ * @property        string                      $currency
+ * @property        string|null                 $description
+ * @property        Address|null                $shipping_address
+ * @property        Address|null                $billing_address
+ * @property        PaymentMetadataItem[]       $metadata
+ * @property        Carbon                      $createdAt
+ * @property        Carbon                      $updatedAt
+ * @property-read   Model                       $billable
  */
 class Payment extends Model
 {
@@ -104,6 +105,19 @@ class Payment extends Model
         return Attribute::make(
             get: fn (string $value): Address|null => Address::jsonDeserialize($value),
             set: fn (Address|null $value): string => json_encode($value),
+        );
+    }
+
+    /**
+     * Interact with the payment's metadata.
+     *
+     * @return Attribute
+     */
+    protected function metadata(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): array => json_decode($value),
+            set: fn (array $value): string => json_encode($value),
         );
     }
 
