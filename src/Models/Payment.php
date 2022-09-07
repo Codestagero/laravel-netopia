@@ -9,7 +9,7 @@ use Codestage\Netopia\Enums\PaymentStatus;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphTo};
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
@@ -23,9 +23,11 @@ use Illuminate\Support\Str;
  * @property        Address|null                $billing_address
  * @property        PaymentMetadataItem[]       $metadata
  * @property        bool                        $payment_method_saved
+ * @property        int                         $payment_method_id
  * @property        Carbon                      $createdAt
  * @property        Carbon                      $updatedAt
  * @property-read   Model                       $billable
+ * @property-read   PaymentMethod               $paymentMethod
  */
 class Payment extends Model
 {
@@ -52,6 +54,11 @@ class Payment extends Model
         'amount',
         'currency',
         'description',
+        'shipping_address',
+        'billing_address',
+        'metadata',
+        'payment_method_saved',
+        'payment_method_id',
     ];
 
     /**
@@ -130,6 +137,16 @@ class Payment extends Model
     public function billable(): MorphTo
     {
         return $this->morphTo('billable');
+    }
+
+    /**
+     * Get the payment method used for this payment.
+     *
+     * @return BelongsTo
+     */
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
     /**

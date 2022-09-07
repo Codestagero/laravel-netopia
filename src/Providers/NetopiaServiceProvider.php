@@ -4,7 +4,7 @@ namespace Codestage\Netopia\Providers;
 
 use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Events\PaymentStatusChangedEvent;
-use Codestage\Netopia\SavePaymentMethodListener;
+use Codestage\Netopia\Listeners\SavePaymentMethodListener;
 use Codestage\Netopia\Services\DefaultPaymentService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;

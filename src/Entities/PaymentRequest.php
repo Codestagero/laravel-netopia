@@ -2,9 +2,10 @@
 
 namespace Codestage\Netopia\Entities;
 
-use Codestage\Netopia\Models\Payment;
+use Codestage\Netopia\Models\{Payment, PaymentMethod};
 use Illuminate\Support\Facades\{Config};
 use Throwable;
+use function is_string;
 
 /**
  * @template TBillable of Illuminate\Database\Eloquent\Model
@@ -66,6 +67,13 @@ class PaymentRequest
      * @var bool
      */
     public bool $savePaymentMethod = false;
+
+    /**
+     * The payment method used for this completing this payment request.
+     *
+     * @var string|null
+     */
+    public string|null $paymentMethodId = null;
 
     /**
      * Payment constructor method.
@@ -197,6 +205,23 @@ class PaymentRequest
     }
 
     /**
+     * Set the existing payment method that is used for completing this payment request.
+     *
+     * @param PaymentMethod|string|null $paymentMethod
+     * @return $this
+     */
+    public function usePaymentMethod(PaymentMethod|string|null $paymentMethod): static
+    {
+        $this->paymentMethodId = match (true) {
+            $paymentMethod instanceof PaymentMethod => $paymentMethod->getKey(),
+            is_string($paymentMethod) => $paymentMethod,
+            default => null
+        };
+
+        return $this;
+    }
+
+    /**
      * Commit this payment to the database.
      *
      * @throws Throwable
@@ -215,6 +240,7 @@ class PaymentRequest
         $payment->shipping_address = $this->shippingAddress;
         $payment->metadata = $this->metadata;
         $payment->payment_method_saved = $this->savePaymentMethod;
+        $payment->payment_method_id = $this->paymentMethodId;
         $payment->saveOrFail();
 
         return $payment;
