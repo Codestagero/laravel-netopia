@@ -35,7 +35,6 @@ class PaymentMethod extends Model
      * @inheritDoc
      */
     protected $fillable = [
-        'id',
         'masked_number',
         'token_id',
         'token_expires_at',

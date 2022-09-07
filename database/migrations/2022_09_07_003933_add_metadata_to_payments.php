@@ -8,13 +8,17 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('netopia_payments', function (Blueprint $table): void {
-            $table->json('metadata')->nullable();
+            $table->json('metadata')
+                ->after('billing_address')
+                ->nullable();
         });
         DB::table('netopia_payments')->whereNull('metadata')->update([
             'metadata' => json_encode('null')
         ]);
         Schema::table('netopia_payments', function (Blueprint $table): void {
-            $table->json('metadata')->nullable(false)->change();
+            $table->json('metadata')
+                ->nullable(false)
+                ->change();
         });
     }
 

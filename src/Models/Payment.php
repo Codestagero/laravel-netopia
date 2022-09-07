@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
  * @property        Address|null                $shipping_address
  * @property        Address|null                $billing_address
  * @property        PaymentMetadataItem[]       $metadata
+ * @property        bool                        $payment_method_saved
  * @property        Carbon                      $createdAt
  * @property        Carbon                      $updatedAt
  * @property-read   Model                       $billable

@@ -61,6 +61,13 @@ class PaymentRequest
     public array $metadata = [];
 
     /**
+     * Whether to save the payment method used for later payments.
+     *
+     * @var bool
+     */
+    public bool $savePaymentMethod = false;
+
+    /**
      * Payment constructor method.
      *
      * @param TBillable $billable
@@ -177,6 +184,19 @@ class PaymentRequest
     }
 
     /**
+     * Set whether to save the payment method used for later use.
+     *
+     * @param bool $save
+     * @return $this
+     */
+    public function savePaymentMethod(bool $save = true): static
+    {
+        $this->savePaymentMethod = $save;
+
+        return $this;
+    }
+
+    /**
      * Commit this payment to the database.
      *
      * @throws Throwable
@@ -194,6 +214,7 @@ class PaymentRequest
         $payment->billing_address = $this->billingAddress;
         $payment->shipping_address = $this->shippingAddress;
         $payment->metadata = $this->metadata;
+        $payment->payment_method_saved = $this->savePaymentMethod;
         $payment->saveOrFail();
 
         return $payment;
