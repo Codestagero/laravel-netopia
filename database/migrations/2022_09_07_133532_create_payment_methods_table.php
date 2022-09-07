@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->string('id', 64)->primary();
             $table->string('masked_number');
             $table->string('token_id');
+            $table->morphs('billable');
             $table->timestamp('token_expires_at');
             $table->timestamps();
         });

@@ -4,19 +4,22 @@ namespace Codestage\Netopia\Traits;
 
 use Carbon\Carbon;
 use Codestage\Netopia\Entities\PaymentRequest;
-use Codestage\Netopia\Models\Payment;
+use Codestage\Netopia\Models\{Payment, PaymentMethod};
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\ArrayShape;
 use Netopia\Payment\Address;
 
 /**
  * A trait applied to entities that can be billed through Netopia.
  *
- * @template    TBillable of Illuminate\Database\Eloquent\Model
- * @method      morphMany(string $class, string $string)
- * @property    string|null      $netopia_token
- * @property    Carbon|null      $netopia_token_expires_at
+ * @template        TBillable of Illuminate\Database\Eloquent\Model
+ * @method          morphMany(string $class, string $string)
+ * @property        string|null                     $netopia_token
+ * @property        Carbon|null                     $netopia_token_expires_at
+ * @property-read   Collection<Payment>             $payments
+ * @property-read   Collection<PaymentMethod>       $paymentMethods
  */
 trait Billable
 {
@@ -75,6 +78,16 @@ trait Billable
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'billable');
+    }
+
+    /**
+     * Get this billable entity's saved payment methods.
+     *
+     * @return MorphMany
+     */
+    public function paymentMethods(): MorphMany
+    {
+        return $this->morphMany(PaymentMethod::class, 'billable');
     }
 
     /**
