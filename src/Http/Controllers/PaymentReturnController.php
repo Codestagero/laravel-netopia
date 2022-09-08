@@ -47,7 +47,7 @@ class PaymentReturnController
         $payment = Payment::query()->findOrFail($ipn->paymentId);
 
         // Emit the new status event
-        PaymentStatusChangedEvent::dispatchIf($ipn->newStatus !== null, $payment, $payment->status, $ipn->newStatus);
+        PaymentStatusChangedEvent::dispatchIf($ipn->newStatus !== null, $payment, $payment->status, $ipn->newStatus, $ipn);
 
         // Update the payment status
         if ($ipn->newStatus !== null) {

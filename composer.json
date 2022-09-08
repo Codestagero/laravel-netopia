@@ -29,7 +29,8 @@
         "illuminate/support": "^9.26",
         "netopia/payment": "^1.0",
         "illuminate/http": "^9.26",
-        "guzzlehttp/guzzle": "^7.4"
+        "guzzlehttp/guzzle": "^7.4",
+        "doctrine/dbal": "^3.4"
     },
     "extra": {
         "laravel": {
