@@ -25,6 +25,7 @@ class SavePaymentMethodListener
             // Otherwise, if this payment's method should be saved, create a payment method.
             if ($event->payment->payment_method_id) {
                 $event->payment->paymentMethod->update([
+                    'masked_number' => $event->result->cardMasked,
                     'token_id' => $event->result->tokenId,
                     'token_expires_at' => $event->result->tokenExpiresAt,
                 ]);
