@@ -7,23 +7,27 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->string('netopia_token')
-                ->nullable()
-                ->default(null);
-            $table->timestamp('netopia_token_expires_at')
-                ->nullable()
-                ->default(null);
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table): void {
+                $table->string('netopia_token')
+                    ->nullable()
+                    ->default(null);
+                $table->timestamp('netopia_token_expires_at')
+                    ->nullable()
+                    ->default(null);
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->dropColumn([
-                'netopia_token',
-                'netopia_token_expires_at'
-            ]);
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table): void {
+                $table->dropColumn([
+                    'netopia_token',
+                    'netopia_token_expires_at'
+                ]);
+            });
+        }
     }
 };
