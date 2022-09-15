@@ -124,7 +124,7 @@ class Payment extends Model
     protected function metadata(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value): array => json_decode($value),
+            get: fn (string $value): array => array_map(fn (array $item) => new PaymentMetadataItem($item['key'], $item['value']), json_decode($value, true)),
             set: fn (array $value): string => json_encode($value),
         );
     }
