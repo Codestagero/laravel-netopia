@@ -3,7 +3,10 @@
 namespace Codestage\Netopia\Providers;
 
 use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Events\PaymentStatusChangedEvent;
+use Codestage\Netopia\Listeners\SavePaymentMethodListener;
 use Codestage\Netopia\Services\DefaultPaymentService;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class NetopiaServiceProvider extends ServiceProvider
@@ -44,5 +47,11 @@ class NetopiaServiceProvider extends ServiceProvider
 
         // Register routes
         $this->loadRoutesFrom(__DIR__ . '/../../routes/netopia.php');
+
+        // Register event listeners
+        Event::listen(
+            PaymentStatusChangedEvent::class,
+            [SavePaymentMethodListener::class, 'handle']
+        );
     }
 }

@@ -58,6 +58,13 @@ class PaymentResult
     public string|null $tokenId = null;
 
     /**
+     * The masked card number.
+     *
+     * @var string|null
+     */
+    public string|null $cardMasked = null;
+
+    /**
      * The expiration date of the billable token received in this result.
      *
      * @var Carbon|null
@@ -97,6 +104,10 @@ class PaymentResult
 
         if (isset($initial['errorType'])) {
             $this->errorType = $initial['errorType'];
+        }
+
+        if (isset($initial['cardMasked'])) {
+            $this->cardMasked = $initial['cardMasked'];
         }
 
         if (isset($initial['tokenId'])) {

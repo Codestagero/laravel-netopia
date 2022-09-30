@@ -87,8 +87,10 @@ class DefaultPaymentService extends PaymentService
      */
     public function decryptPayment(string $environment, string $data): PaymentResult
     {
+        // Decrypt the payment result data
         $paymentData = Card::factoryFromEncrypted($environment, $data, $this->secretKeyPath);
 
+        // Determine the new payment status
         if ((int) $paymentData->objPmNotify->errorCode === 0) {
             $status = match ($paymentData->objPmNotify->action) {
                 'confirmed' => PaymentStatus::Confirmed,
@@ -109,12 +111,14 @@ class DefaultPaymentService extends PaymentService
             'status' => $status,
         ]);
 
+        // Build and return the result
         return new PaymentResult([
             'newStatus' => $status,
             'paymentId' => $paymentData->orderId,
             'transactionReference' => $paymentData->objPmNotify->rrn,
             'errorCode' => $paymentData->objPmNotify->errorCode,
             'errorText' => $paymentData->objPmNotify->errorMessage,
+            'cardMask' => $paymentData->objPmNotify->pan_masked,
             'tokenId' => $paymentData->objPmNotify->token_id,
             'tokenExpiresAt' => $paymentData->objPmNotify->token_expiration_date
         ]);
