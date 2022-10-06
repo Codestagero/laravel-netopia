@@ -6,6 +6,7 @@ use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Events\PaymentStatusChangedEvent;
 use Codestage\Netopia\Models\Payment;
 use Codestage\Netopia\Traits\Billable;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\{Model, ModelNotFoundException};
 use Illuminate\Http\{Request, Response as PlainResponse};
 use Illuminate\Support\Facades\{Response};
@@ -13,6 +14,13 @@ use Throwable;
 
 class PaymentReturnController
 {
+    /**
+     * PaymentReturnController constructor method.
+     */
+    public function __construct(private readonly Dispatcher $_eventDispatcher)
+    {
+    }
+
     /**
      * Process a Netopia payment result.
      *
@@ -46,8 +54,8 @@ class PaymentReturnController
         /** @var Payment $payment */
         $payment = Payment::query()->findOrFail($ipn->paymentId);
 
-        // Emit the new status event
-        PaymentStatusChangedEvent::dispatchIf($ipn->newStatus !== null, $payment, $payment->status, $ipn->newStatus, $ipn);
+        // Remember the old status
+        $oldStatus = $payment->status;
 
         // Update the payment status
         if ($ipn->newStatus !== null) {
@@ -65,6 +73,11 @@ class PaymentReturnController
             $billable->netopia_token_expires_at = $ipn->tokenExpiresAt;
 
             $billable->save();
+        }
+
+        // Emit the new status event
+        if ($ipn->newStatus !== null) {
+            $this->_eventDispatcher->dispatch(new PaymentStatusChangedEvent($payment, $oldStatus, $ipn->newStatus, $ipn));
         }
 
         // Return a payment result XML
