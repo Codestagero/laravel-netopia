@@ -20,6 +20,10 @@ class SavePaymentMethodListener
     public function handle(PaymentStatusChangedEvent $event): void
     {
         if ($event->newStatus === PaymentStatus::Confirmed && $event->oldStatus !== PaymentStatus::Confirmed) {
+            Log::debug('Payment status changed', [
+                'payment' => $event->payment,
+                'result' => $event->result
+            ]);
 
             // If the payment already has a payment method attached, update its token.
             // Otherwise, if this payment's method should be saved, create a payment method.
