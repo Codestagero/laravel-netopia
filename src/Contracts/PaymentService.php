@@ -42,5 +42,5 @@ abstract class PaymentService extends NetopiaService
      * @throws Exception
      * @return mixed
      */
-    public abstract function soapPayment(Payment $payment): mixed;
+    public abstract function executeSoap(Payment $payment): mixed;
 }
