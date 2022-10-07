@@ -12,14 +12,12 @@ use Codestage\Netopia\Traits\Billable;
 use Exception;
 use Illuminate\Contracts\Config\Repository as ConfigurationRepository;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Log\LogManager;
 use Netopia\Payment\Invoice;
 use Netopia\Payment\Request\{Card, PaymentAbstract};
 use SoapClient;
 use SoapFault;
 use stdClass;
-use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -148,7 +146,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -180,12 +178,9 @@ class DefaultPaymentService extends PaymentService
             throw new ConfigurationException('Signature not configured!');
         }
 
-        // Make sure that the billable entity has a valid token
-        /** @var Model|Billable $billable */
-        $billable = $payment->billable;
-
-        if (!$billable->netopia_token || ($billable->netopia_token_expires_at instanceof Carbon && $billable->netopia_token_expires_at->isPast())) {
-            throw new NetopiaException('The billable entity must have a valid associated token.');
+        // Make sure that there is a payment method attached to this payment
+        if (!$payment->paymentMethod || ($payment->paymentMethod->token_expires_at instanceof Carbon && $payment->paymentMethod->token_expires_at->isPast())) {
+            throw new NetopiaException('This payment does not have a payment method set.');
         }
 
         // Create the SOAP client
@@ -207,7 +202,7 @@ class DefaultPaymentService extends PaymentService
 
         // Build the transaction object
         $transaction = new stdClass();
-        $transaction->paymentToken = $billable->netopia_token;
+        $transaction->paymentToken = $payment->paymentMethod->token_id;
 
         // Build the order object
         $order = new stdClass();
