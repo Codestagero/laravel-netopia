@@ -208,30 +208,6 @@ class DefaultPaymentService extends PaymentService
         $transaction = new stdClass();
         $transaction->paymentToken = $billable->netopia_token;
 
-        // Build the billing address object
-        $billing = new stdClass();
-        $billing->country = 'billing_country';
-        $billing->county = 'billing_county';
-        $billing->city = 'billing_city';
-        $billing->address = 'billing_address';
-        $billing->postal_code = 'billing_postal_code';
-        $billing->first_name = 'billing_first_name';
-        $billing->last_name = 'billing_last_name';
-        $billing->phone = 'billing_phone';
-        $billing->email = 'email_address';
-
-        // Build the shipping address object
-        $shipping = new stdClass();
-        $shipping->country = 'shipping_country';
-        $shipping->county = 'shipping_county';
-        $shipping->city = 'shipping_city';
-        $shipping->address = 'shipping_address';
-        $shipping->postal_code = 'shipping_postal_code';
-        $shipping->first_name = 'shipping_first_name';
-        $shipping->last_name = 'shipping_last_name';
-        $shipping->phone = 'shipping_phone';
-        $shipping->email = 'shipping_email';
-
         // Build the order object
         $order = new stdClass();
         $order->id = $payment->id; //your orderId. As with all mobilPay payments, it needs to be unique at seller account level
@@ -243,8 +219,8 @@ class DefaultPaymentService extends PaymentService
         }
 
         $order->currency = $payment->currency; //currency
-        $order->billing = $billing;
-        $order->shipping = $shipping;
+        $order->billing = $payment->billing_address;
+        $order->shipping = $payment->shipping_address;
 
         // Build the HASH
         $account->hash = mb_strtoupper(sha1(mb_strtoupper($this->_configuration->get('netopia.account_password_hash')) . $order->id . $order->amount . $order->currency . $account->id));
