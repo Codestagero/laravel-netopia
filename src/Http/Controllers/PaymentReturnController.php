@@ -4,8 +4,7 @@ namespace Codestage\Netopia\Http\Controllers;
 
 use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Models\Payment;
-use Codestage\Netopia\Traits\Billable;
-use Illuminate\Database\Eloquent\{Model, ModelNotFoundException};
+use Illuminate\Database\Eloquent\{ModelNotFoundException};
 use Illuminate\Http\{Request, Response as PlainResponse};
 use Illuminate\Support\Facades\{Response};
 use Throwable;
@@ -54,16 +53,6 @@ class PaymentReturnController
 
         // Update the payment status
         $paymentService->executePaymentResult($payment, $ipn);
-
-        // If a token was received with this payment, store it in the billable model
-        if ($ipn->tokenId) {
-            /** @var Model|Billable $billable */
-            $billable = $payment->billable;
-            $billable->netopia_token = $ipn->tokenId;
-            $billable->netopia_token_expires_at = $ipn->tokenExpiresAt;
-
-            $billable->save();
-        }
 
         // Return a payment result XML
         return Response::view('netopia::payment_result', [
