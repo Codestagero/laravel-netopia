@@ -21,6 +21,7 @@ use SoapClient;
 use SoapFault;
 use stdClass;
 use Throwable;
+use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -153,7 +154,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -176,6 +177,7 @@ class DefaultPaymentService extends PaymentService
      * @throws ConfigurationException
      * @throws NetopiaException
      * @throws Exception
+     * @throws Throwable
      * @return mixed
      */
     public function executeSoap(Payment $payment): mixed
@@ -246,6 +248,35 @@ class DefaultPaymentService extends PaymentService
                 throw new Exception($response->code, $response->message);
             }
 
+            // Determine the new payment status
+            if ((int) $response->errors->code === 0) {
+                $status = match ($response->errors->action) {
+                    'confirmed' => PaymentStatus::Confirmed,
+                    'paid_pending', 'confirmed_pending' => PaymentStatus::Pending,
+                    'paid' => PaymentStatus::Preauthorized,
+                    'canceled' => PaymentStatus::Cancelled,
+                    'credit' => PaymentStatus::Refunded,
+                };
+            } else {
+                $status = PaymentStatus::Rejected;
+            }
+
+            // Build payment result
+            $paymentResult = new PaymentResult([
+                'newStatus' => $status,
+                'paymentId' => $payment->getKey(),
+                'transactionReference' => null,
+                'errorCode' => $response->errors->code,
+                'errorText' => $response->errors->message,
+                'cardMasked' => null,
+                'tokenId' => null,
+                'tokenExpiresAt' => null
+            ]);
+
+            // Apply the payment result to the given payment
+            $this->executePaymentResult($payment, $paymentResult);
+
+            // Return the response
             return $response;
         } catch(SoapFault $e) {
             throw new Exception($e->faultstring);
