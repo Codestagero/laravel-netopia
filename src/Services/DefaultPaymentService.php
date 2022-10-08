@@ -132,7 +132,7 @@ class DefaultPaymentService extends PaymentService
             'transactionReference' => $paymentData->objPmNotify->rrn,
             'errorCode' => $paymentData->objPmNotify->errorCode,
             'errorText' => $paymentData->objPmNotify->errorMessage,
-            'cardMask' => $paymentData->objPmNotify->pan_masked,
+            'cardMasked' => $paymentData->objPmNotify->pan_masked,
             'tokenId' => $paymentData->objPmNotify->token_id,
             'tokenExpiresAt' => $paymentData->objPmNotify->token_expiration_date
         ]);
