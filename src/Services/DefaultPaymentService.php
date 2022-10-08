@@ -239,7 +239,7 @@ class DefaultPaymentService extends PaymentService
         try {
             $this->_logManager->debug('SOAP request', [$req]);
 
-            $response = $soap->doPayT(['request' => $req]);
+            $response = $soap->doPayT(['request' => $req])->doPayTResult;
 
             $this->_logManager->debug('SOAP response', [$response]);
 
