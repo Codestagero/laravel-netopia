@@ -6,11 +6,13 @@ use Carbon\Carbon;
 use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Entities\{Address, EncryptedPayment, PaymentResult};
 use Codestage\Netopia\Enums\PaymentStatus;
+use Codestage\Netopia\Events\PaymentStatusChangedEvent;
 use Codestage\Netopia\Exceptions\{ConfigurationException, NetopiaException};
 use Codestage\Netopia\Models\Payment;
 use Codestage\Netopia\Traits\Billable;
 use Exception;
 use Illuminate\Contracts\Config\Repository as ConfigurationRepository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Log\LogManager;
 use Netopia\Payment\Invoice;
@@ -18,6 +20,7 @@ use Netopia\Payment\Request\{Card, PaymentAbstract};
 use SoapClient;
 use SoapFault;
 use stdClass;
+use Throwable;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -27,14 +30,18 @@ use const WSDL_CACHE_NONE;
 class DefaultPaymentService extends PaymentService
 {
     /**
-     * @inheritDoc
+     * Default {@link PaymentService} implementation.
+     *
      * @param ConfigurationRepository $_configuration
      * @param LogManager $_logManager
+     * @param UrlGenerator $_urlGenerator
+     * @param Dispatcher $_eventDispatcher
      */
     public function __construct(
         private readonly ConfigurationRepository $_configuration,
         private readonly LogManager $_logManager,
-        private readonly UrlGenerator $_urlGenerator
+        private readonly UrlGenerator $_urlGenerator,
+        private readonly Dispatcher $_eventDispatcher
     ) {
         parent::__construct($this->_configuration);
     }
@@ -243,5 +250,28 @@ class DefaultPaymentService extends PaymentService
         } catch(SoapFault $e) {
             throw new Exception($e->faultstring);
         }
+    }
+
+    /**
+     * Update the status of the given {@link $payment payment}.
+     *
+     * @param Payment $payment
+     * @param PaymentResult $paymentResult
+     * @throws Throwable
+     * @return void
+     */
+    public function executePaymentResult(Payment $payment, PaymentResult $paymentResult): void
+    {
+        // Remember the old status
+        $oldStatus = $payment->status;
+
+        // Update the payment status
+        $payment->status = $paymentResult->newStatus;
+
+        // Save the changes applied on the payment model
+        $payment->saveOrFail();
+
+        // Emit the new status event
+        $this->_eventDispatcher->dispatch(new PaymentStatusChangedEvent($payment, $oldStatus, $paymentResult->newStatus, $paymentResult));
     }
 }

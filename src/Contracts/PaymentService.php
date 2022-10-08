@@ -7,6 +7,7 @@ use Codestage\Netopia\Exceptions\{ConfigurationException, NetopiaException};
 use Codestage\Netopia\Models\Payment;
 use Exception;
 use SoapFault;
+use Throwable;
 
 /**
  * @template TBillable
@@ -43,4 +44,14 @@ abstract class PaymentService extends NetopiaService
      * @return mixed
      */
     public abstract function executeSoap(Payment $payment): mixed;
+
+    /**
+     * Update the status of the given {@link $payment payment}.
+     *
+     * @param Payment $payment
+     * @param PaymentResult $paymentResult
+     * @throws Throwable
+     * @return void
+     */
+    public abstract function executePaymentResult(Payment $payment, PaymentResult $paymentResult): void;
 }

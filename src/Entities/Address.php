@@ -5,7 +5,6 @@ namespace Codestage\Netopia\Entities;
 use Codestage\Netopia\Enums\AddressType;
 use Illuminate\Contracts\Support\Jsonable;
 use Netopia\Payment\Address as NetopiaAddress;
-use function is_string;
 
 class Address implements Jsonable
 {
@@ -104,7 +103,7 @@ class Address implements Jsonable
             $this->county,
             $this->country,
             $this->postCode
-        ], fn (mixed $v) => $v && (!is_string($v) || $v !== '')));
+        ], fn (mixed $v) => $v && (!\is_string($v) || $v !== '')));
         $address->email = $this->email;
         $address->mobilePhone = $this->phone;
 
