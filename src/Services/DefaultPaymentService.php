@@ -18,7 +18,6 @@ use Netopia\Payment\Request\{Card, PaymentAbstract};
 use SoapClient;
 use SoapFault;
 use stdClass;
-use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -65,12 +64,12 @@ class DefaultPaymentService extends PaymentService
 
         if ($payment->billing_address instanceof Address) {
             // Billing Info
-            $paymentRequest->invoice->setBillingAddress($payment->billing_address->toNetopia());
+            $paymentRequest->invoice->setBillingAddress($payment->billing_address->toPaymentAddress());
         }
 
         if ($payment->shipping_address instanceof Address) {
             // Shipping Info
-            $paymentRequest->invoice->setShippingAddress($payment->shipping_address->toNetopia());
+            $paymentRequest->invoice->setShippingAddress($payment->shipping_address->toPaymentAddress());
         }
 
         $this->_logManager->debug('Encrypted payment', [
@@ -147,7 +146,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -216,8 +215,8 @@ class DefaultPaymentService extends PaymentService
         }
 
         $order->currency = $payment->currency; //currency
-        $order->billing = $payment->billing_address;
-        $order->shipping = $payment->shipping_address;
+        $order->billing = $payment->billing_address?->toSoapAddress();
+        $order->shipping = $payment->shipping_address?->toSoapAddress();
 
         // Build the HASH
         $account->hash = mb_strtoupper(sha1(mb_strtoupper($this->_configuration->get('netopia.account_password_hash')) . $order->id . $order->amount . $order->currency . $account->id));
