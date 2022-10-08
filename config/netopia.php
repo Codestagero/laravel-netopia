@@ -24,6 +24,7 @@ return [
     |
     */
     'signature' => env('NETOPIA_SIGNATURE'),
+    'soap_signature' => env('NETOPIA_SOAP_SIGNATURE', env('NETOPIA_SIGNATURE')),
 
     /*
     |--------------------------------------------------------------------------

@@ -18,6 +18,7 @@ use Netopia\Payment\Request\{Card, PaymentAbstract};
 use SoapClient;
 use SoapFault;
 use stdClass;
+use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -146,7 +147,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -195,7 +196,7 @@ class DefaultPaymentService extends PaymentService
 
         // Build the account object
         $account = new stdClass();
-        $account->id = $this->_configuration->get('netopia.signature');
+        $account->id = $this->_configuration->get('netopia.soap_signature');
         $account->user_name = $this->_configuration->get('netopia.username'); // please ask mobilPay to upgrade the necessary access required for token payments
         $account->customer_ip = '0.0.0.0'; // The buyer's IP address
         $account->confirm_url = $this->_urlGenerator->route('netopia.ipn');  // this is where mobilPay will send the payment result. This has priority over the SOAP call response
