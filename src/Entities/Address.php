@@ -136,10 +136,16 @@ class Address implements Jsonable
      * Convert a JSON representation of this class to an actual object.
      *
      * @param string $json
-     * @return Address
+     * @return Address|null
      */
-    public static function fromJson(string $json): Address
+    public static function fromJson(string $json): ?Address
     {
-        return new self(json_decode($json, true));
+        $decoded = json_decode($json, true);
+
+        if ($decoded) {
+            return new self($decoded);
+        } else {
+            return null;
+        }
     }
 }
