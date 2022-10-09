@@ -99,7 +99,7 @@ class Payment extends Model
     {
         return Attribute::make(
             get: fn (string $value): Address|null => Address::fromJson($value),
-            set: fn (Address|null $value): string => $value->toJson(),
+            set: fn (Address|null $value): string => $value?->toJson(),
         );
     }
 
@@ -112,7 +112,7 @@ class Payment extends Model
     {
         return Attribute::make(
             get: fn (string $value): Address|null => Address::fromJson($value),
-            set: fn (Address|null $value): string => $value->toJson(),
+            set: fn (Address|null $value): string => $value?->toJson(),
         );
     }
 
