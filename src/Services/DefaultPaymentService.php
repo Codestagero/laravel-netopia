@@ -21,7 +21,6 @@ use SoapClient;
 use SoapFault;
 use stdClass;
 use Throwable;
-use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -154,7 +153,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -301,6 +300,18 @@ class DefaultPaymentService extends PaymentService
 
         // Save the changes applied on the payment model
         $payment->saveOrFail();
+
+        // Save used card details
+        $usedCard = [
+            'masked_number' => $paymentResult->cardMasked,
+            'token_id' => $paymentResult->tokenId,
+            'token_expires_at' => $paymentResult->tokenExpiresAt,
+        ];
+        $usedCard = array_filter($usedCard, fn (mixed $item) => !!$item);
+
+        if (!empty($usedCard)) {
+            $payment->usedCard()->updateOrCreate([], $usedCard);
+        }
 
         // Emit the new status event
         $this->_eventDispatcher->dispatch(new PaymentStatusChangedEvent($payment, $oldStatus, $paymentResult->newStatus, $paymentResult));

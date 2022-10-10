@@ -9,7 +9,7 @@ use Codestage\Netopia\Enums\PaymentStatus;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphTo};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasOne, MorphTo};
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
  * @property        Carbon                      $updatedAt
  * @property-read   Model                       $billable
  * @property-read   PaymentMethod               $paymentMethod
+ * @property-read   PaymentCard|null            $usedCard
  */
 class Payment extends Model
 {
@@ -59,6 +60,7 @@ class Payment extends Model
         'metadata',
         'payment_method_saved',
         'payment_method_id',
+        'card_details_id',
     ];
 
     /**
@@ -161,5 +163,15 @@ class Payment extends Model
         $paymentService = App::make(PaymentService::class);
 
         return $paymentService->generateEncryptedPayment($this);
+    }
+
+    /**
+     * Get the card used for this payment.
+     *
+     * @return HasOne<PaymentCard|null>
+     */
+    public function usedCard(): HasOne
+    {
+        return $this->hasOne(PaymentCard::class, 'card_details_id');
     }
 }
