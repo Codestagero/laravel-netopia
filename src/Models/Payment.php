@@ -24,6 +24,7 @@ use Illuminate\Support\Str;
  * @property        PaymentMetadataItem[]       $metadata
  * @property        bool                        $payment_method_saved
  * @property        int                         $payment_method_id
+ * @property        int|null                    $card_details_id
  * @property        Carbon                      $createdAt
  * @property        Carbon                      $updatedAt
  * @property-read   Model                       $billable
