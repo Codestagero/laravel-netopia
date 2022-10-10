@@ -24,6 +24,27 @@ return [
     |
     */
     'signature' => env('NETOPIA_SIGNATURE'),
+    'soap_signature' => env('NETOPIA_SOAP_SIGNATURE', env('NETOPIA_SIGNATURE')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account Password
+    |--------------------------------------------------------------------------
+    |
+    | The Netopia account password, hashed using MD5.
+    |
+    */
+    'account_password_hash' => env('NETOPIA_ACCOUNT_PASSWORD_HASH'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Netopia user name
+    |--------------------------------------------------------------------------
+    |
+    | The Netopia account password, hashed using MD5.
+    |
+    */
+    'username' => env('NETOPIA_USER_NAME', env('APP_NAME')),
 
     /*
     |--------------------------------------------------------------------------

@@ -5,7 +5,6 @@ namespace Codestage\Netopia\Entities;
 use Codestage\Netopia\Models\{Payment, PaymentMethod};
 use Illuminate\Support\Facades\{Config};
 use Throwable;
-use function is_string;
 
 /**
  * @template TBillable of Illuminate\Database\Eloquent\Model
@@ -155,12 +154,12 @@ class PaymentRequest
     /**
      * Set the address used for this payment.
      *
-     * @param Address|null $billingAddress
+     * @param Address|null $shippingAddress
      * @return $this
      */
-    public function setShippingAddress(Address|null $billingAddress): static
+    public function setShippingAddress(Address|null $shippingAddress): static
     {
-        $this->billingAddress = $billingAddress;
+        $this->shippingAddress = $shippingAddress;
 
         return $this;
     }
@@ -214,7 +213,7 @@ class PaymentRequest
     {
         $this->paymentMethodId = match (true) {
             $paymentMethod instanceof PaymentMethod => $paymentMethod->getKey(),
-            is_string($paymentMethod) => $paymentMethod,
+            \is_string($paymentMethod) => $paymentMethod,
             default => null
         };
 

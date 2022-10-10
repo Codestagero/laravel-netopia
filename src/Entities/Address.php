@@ -4,70 +4,28 @@ namespace Codestage\Netopia\Entities;
 
 use Codestage\Netopia\Enums\AddressType;
 use Illuminate\Contracts\Support\Jsonable;
-use JetBrains\PhpStorm\ArrayShape;
-use JsonSerializable;
 use Netopia\Payment\Address as NetopiaAddress;
-use function is_array;
-use function is_string;
 
-class Address implements Jsonable, JsonSerializable
+class Address implements Jsonable
 {
-    /**
-     * This address' type.
-     *
-     * @var AddressType|null
-     */
-    public AddressType|null $type = null;
+    public AddressType $type;
+    public string $firstName;
+    public string $lastName;
+    public string $address;
+    public string $email;
+    public string $phone;
+    public string $city;
+    public string $county;
+    public string $country;
+    public string $postCode;
 
-    /**
-     * This first name of the entity this address is for.
-     *
-     * @var string|null
-     */
-    public string|null $firstName = null;
-
-    /**
-     * This last name of the entity this address is for.
-     *
-     * @var string|null
-     */
-    public string|null $lastName = null;
-
-    /**
-     * This address' text directions.
-     *
-     * @var string|null
-     */
-    public string|null $address = null;
-
-    /**
-     * This e-mail address of the entity this address is for.
-     *
-     * @var string|null
-     */
-    public string|null $email = null;
-
-    /**
-     * This mobile phone number of the entity this address is for.
-     *
-     * @var string|null
-     */
-    public string|null $phoneNumber = null;
-
-    /**
-     * Address constructor method.
-     *
-     * @param array $initial Initial data that is to be assigned to the new entity.
-     */
-    public function __construct(
-        #[ArrayShape(['type' => '\Codestage\Netopia\Enums\AddressType|string|null', 'firstName' => 'string|null', 'lastName' => 'string|null', 'address' => 'string|null', 'email' => 'string|null', 'phoneNumber' => 'string|null'])]
-        array $initial = []
-    ) {
+    public function __construct(array $initial = [])
+    {
         if (isset($initial['type'])) {
-            if (is_string($initial['type'])) {
-                $this->type = AddressType::tryFrom($initial['type']);
-            } else {
+            if ($initial['type'] instanceof AddressType) {
                 $this->type = $initial['type'];
+            } else {
+                $this->type = AddressType::from($initial['type']);
             }
         }
 
@@ -87,45 +45,69 @@ class Address implements Jsonable, JsonSerializable
             $this->email = $initial['email'];
         }
 
-        if (isset($initial['phoneNumber'])) {
-            $this->phoneNumber = $initial['phoneNumber'];
+        if (isset($initial['phone'])) {
+            $this->phone = $initial['phone'];
+        }
+
+        if (isset($initial['city'])) {
+            $this->city = $initial['city'];
+        }
+
+        if (isset($initial['county'])) {
+            $this->county = $initial['county'];
+        }
+
+        if (isset($initial['country'])) {
+            $this->country = $initial['country'];
+        }
+
+        if (isset($initial['postCode'])) {
+            $this->postCode = $initial['postCode'];
         }
     }
 
     /**
-     * Specify data which should be serialized to JSON.
+     * Convert this address to a SoapAddress object.
      *
-     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return array data which can be serialized by <b>json_encode</b>, which is a value of any type other than a resource.
+     * @return SoapAddress
      */
-    #[ArrayShape(['type' => 'mixed', 'firstName' => 'mixed', 'lastName' => 'mixed', 'address' => 'mixed', 'email' => 'mixed', 'phoneNumber' => 'mixed'])]
-    public function jsonSerialize(): array
+    public function toSoapAddress(): SoapAddress
     {
-        return [
-            'type' => $this->type,
-            'firstName' => $this->firstName,
-            'lastName' => $this->lastName,
+        return new SoapAddress([
+            'country' => $this->country,
+            'county' => $this->county,
+            'city' => $this->city,
             'address' => $this->address,
+            'postal_code' => $this->postCode,
+            'first_name' => $this->firstName,
+            'last_name' => $this->lastName,
+            'phone' => $this->phone,
             'email' => $this->email,
-            'phoneNumber' => $this->phoneNumber,
-        ];
+        ]);
     }
 
     /**
-     * Specify data which should be deserialized from JSON.
+     * Convert this address to a NetopiaAddress object.
      *
-     * @return Address|null data which can be deserialized from the JSON representation.
+     * @return NetopiaAddress
      */
-    #[ArrayShape(['type' => 'mixed', 'firstName' => 'mixed', 'lastName' => 'mixed', 'address' => 'mixed', 'email' => 'mixed', 'phoneNumber' => 'mixed'])]
-    public static function jsonDeserialize(string $json): self|null
+    public function toPaymentAddress(): NetopiaAddress
     {
-        $decoded = json_decode($json, true);
+        $address = new NetopiaAddress();
+        $address->type = $this->type;
+        $address->firstName = $this->firstName;
+        $address->lastName = $this->lastName;
+        $address->address = join(', ', array_filter([
+            $this->address,
+            $this->city,
+            $this->county,
+            $this->country,
+            $this->postCode
+        ], fn (mixed $v) => $v && (!\is_string($v) || $v !== '')));
+        $address->email = $this->email;
+        $address->mobilePhone = $this->phone;
 
-        if (is_array($decoded)) {
-            return new self($decoded);
-        } else {
-            return null;
-        }
+        return $address;
     }
 
     /**
@@ -136,24 +118,34 @@ class Address implements Jsonable, JsonSerializable
      */
     public function toJson($options = 0): string
     {
-        return json_encode($this, $options);
+        return json_encode([
+            'type' => $this->type,
+            'firstName' => $this->firstName,
+            'lastName' => $this->lastName,
+            'address' => $this->address,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'city' => $this->city,
+            'county' => $this->county,
+            'country' => $this->country,
+            'postCode' => $this->postCode,
+        ], $options);
     }
 
     /**
-     * Convert the object to its Netopia representation.
+     * Convert a JSON representation of this class to an actual object.
      *
-     * @return NetopiaAddress
+     * @param string $json
+     * @return Address|null
      */
-    public function toNetopia(): NetopiaAddress
+    public static function fromJson(string $json): ?Address
     {
-        $address = new NetopiaAddress();
-        $address->type = $this->type;
-        $address->firstName = $this->firstName;
-        $address->lastName = $this->lastName;
-        $address->address = $this->address;
-        $address->email = $this->email;
-        $address->mobilePhone = $this->phoneNumber;
+        $decoded = json_decode($json, true);
 
-        return $address;
+        if ($decoded) {
+            return new self($decoded);
+        } else {
+            return null;
+        }
     }
 }

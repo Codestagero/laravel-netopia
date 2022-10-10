@@ -28,32 +28,47 @@ class SavePaymentMethodListener
             // If the payment already has a payment method attached, update its token.
             // Otherwise, if this payment's method should be saved, create a payment method.
             if ($event->payment->payment_method_id) {
-                $event->payment->paymentMethod->update([
-                    'masked_number' => $event->result->cardMasked,
-                    'token_id' => $event->result->tokenId,
-                    'token_expires_at' => $event->result->tokenExpiresAt,
-                ]);
+                if ($event->result->cardMasked) {
+                    $event->payment->paymentMethod->masked_number = $event->result->cardMasked;
+                }
+                if ($event->result->tokenId) {
+                    $event->payment->paymentMethod->token_id = $event->result->tokenId;
+                }
+                if ($event->result->tokenExpiresAt) {
+                    $event->payment->paymentMethod->token_expires_at = $event->result->tokenExpiresAt;
+                }
 
-                Log::debug('Payment method updated', [
-                    'payment_method' => $event->payment->paymentMethod->getKey(),
-                    'payment' => $event->payment->paymentMethod->getKey()
-                ]);
+                // If the payment method has actually been updated, run the update
+                if ($event->payment->paymentMethod->isDirty()) {
+                    $event->payment->paymentMethod->save();
+
+                    Log::debug('Payment method updated', [
+                        'payment_method' => $event->payment->paymentMethod->getKey(),
+                        'payment' => $event->payment->paymentMethod->getKey()
+                    ]);
+                }
             } else if ($event->payment->payment_method_saved) {
-                /** @var PaymentMethod $paymentMethod */
-                $paymentMethod = PaymentMethod::query()->make([
-                    'masked_number' => $event->result->cardMasked,
-                    'token_id' => $event->result->tokenId,
-                    'token_expires_at' => $event->result->tokenExpiresAt,
-                ]);
+                if ($event->result->cardMasked && $event->result->tokenId && $event->result->tokenExpiresAt) {
+                    /** @var PaymentMethod $paymentMethod */
+                    $paymentMethod = PaymentMethod::query()->make([
+                        'masked_number' => $event->result->cardMasked,
+                        'token_id' => $event->result->tokenId,
+                        'token_expires_at' => $event->result->tokenExpiresAt,
+                    ]);
 
-                $paymentMethod->billable()->associate($event->payment->billable);
+                    $paymentMethod->billable()->associate($event->payment->billable);
 
-                $paymentMethod->saveOrFail();
+                    $paymentMethod->saveOrFail();
 
-                Log::debug('Payment method saved', [
-                    'payment_method' => $paymentMethod->getKey(),
-                    'payment' => $paymentMethod->getKey()
-                ]);
+                    Log::debug('Payment method saved', [
+                        'payment_method' => $paymentMethod->getKey(),
+                        'payment' => $event->payment->getKey()
+                    ]);
+                } else {
+                    Log::warning('Payment method does not have enough info to be saved.', [
+                        'event' => $event
+                    ]);
+                }
             }
         }
     }
