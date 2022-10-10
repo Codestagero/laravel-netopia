@@ -19,7 +19,7 @@ class SavePaymentMethodListener
      */
     public function handle(PaymentStatusChangedEvent $event): void
     {
-        if ($event->newStatus === PaymentStatus::Confirmed && $event->oldStatus !== PaymentStatus::Confirmed) {
+        if ($event->newStatus === PaymentStatus::Confirmed) {
             Log::debug('Payment status changed', [
                 'payment' => $event->payment,
                 'result' => $event->result
