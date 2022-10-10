@@ -172,6 +172,6 @@ class Payment extends Model
      */
     public function usedCard(): HasOne
     {
-        return $this->hasOne(PaymentCard::class, 'card_details_id');
+        return $this->hasOne(PaymentCard::class, 'payment_id');
     }
 }
