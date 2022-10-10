@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->references('id')
                 ->on('netopia_payment_methods')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->nullOnDelete();
         });
     }
 
