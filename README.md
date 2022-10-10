@@ -1,6 +1,8 @@
 ![@patrasq/dev-tools](https://i.imgur.com/GGHIKR2.png)
 
 # laravel-netopia
+[![Packagist Version (including pre-releases)](https://img.shields.io/github/v/release/codestagero/laravel-netopia?include_prereleases)](https://packagist.org/packages/codestage/laravel-netopia)
+
 A fluent interface for interacting with Netopia's services.
 
 # Info
