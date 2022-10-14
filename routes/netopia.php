@@ -14,6 +14,6 @@ if (config('netopia.domain')) {
 $routing->group(function (): void {
     Route::get('{payment}', PaymentController::class)->name('pay');
 
-    Route::get('/{payment}/success', [PaymentReturnController::class, 'success'])->name('success');
-    Route::post('/ipn', [PaymentReturnController::class, 'ipn'])->name('ipn');
+    Route::get('success', [PaymentReturnController::class, 'success'])->name('success');
+    Route::post('ipn', [PaymentReturnController::class, 'ipn'])->name('ipn');
 });
