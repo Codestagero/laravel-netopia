@@ -15,5 +15,8 @@ $routing->group(function (): void {
     Route::get('{payment}', PaymentController::class)->name('pay');
 
     Route::get('success', [PaymentReturnController::class, 'success'])->name('success');
-    Route::post('ipn', [PaymentReturnController::class, 'ipn'])->name('ipn');
+    Route::post('ipn', [PaymentReturnController::class, 'ipn'])
+        ->withoutMiddleware('web')
+        ->middleware('api')
+        ->name('ipn');
 });
