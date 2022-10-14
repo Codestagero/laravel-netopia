@@ -3,7 +3,17 @@
 use Codestage\Netopia\Http\Controllers\{PaymentController, PaymentReturnController};
 use Illuminate\Support\Facades\Route;
 
-Route::get('/netopia/pay/{payment}', PaymentController::class)->name('netopia.pay');
+$routing = Route::prefix(config('netopia.route_prefix'))
+    ->middleware(config('netopia.route_middleware', 'web'))
+    ->name('netopia.');
 
-Route::get('/netopia/success', [PaymentReturnController::class, 'success'])->name('netopia.success');
-Route::post('/netopia/ipn', [PaymentReturnController::class, 'ipn'])->name('netopia.ipn');
+if (config('netopia.domain')) {
+    $routing = $routing->domain(config('netopia.domain'));
+}
+
+$routing->group(function (): void {
+    Route::get('{payment}', PaymentController::class)->name('pay');
+
+    Route::get('/{payment}/success', [PaymentReturnController::class, 'success'])->name('success');
+    Route::post('/ipn', [PaymentReturnController::class, 'ipn'])->name('ipn');
+});

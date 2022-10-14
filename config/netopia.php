@@ -81,5 +81,17 @@ return [
     'payable_statuses' => [
         PaymentStatus::NotStarted,
         PaymentStatus::Rejected
-    ]
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Routing
+    |--------------------------------------------------------------------------
+    |
+    | Routing configuration.
+    |
+    */
+    'domain' => env('NETOPIA_ROUTE_DOMAIN'),
+    'route_prefix' => 'netopia',
+    'route_middleware' => ['web'],
 ];
