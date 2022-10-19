@@ -21,6 +21,7 @@ use SoapClient;
 use SoapFault;
 use stdClass;
 use Throwable;
+use function in_array;
 use const WSDL_CACHE_NONE;
 
 /**
@@ -153,7 +154,7 @@ class DefaultPaymentService extends PaymentService
     private function extractPaymentBillableToken(Payment $payment): string|null
     {
         if ($payment->billable) {
-            if (\in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
+            if (in_array(Billable::class, class_uses_recursive($payment->billable), true)) {
                 /** @var Billable $billable */
                 $billable = $payment->billable;
 
@@ -244,7 +245,10 @@ class DefaultPaymentService extends PaymentService
             $this->_logManager->debug('SOAP response', [$response]);
 
             if (isset($response->errors) && (int) $response->errors->code !== 0x00) {
-                throw new Exception($response->errors->code, $response->errors->message);
+                throw new Exception(
+                    message: $response->errors->message,
+                    code: (int) $response->errors->code
+                );
             }
 
             // Determine the new payment status
