@@ -92,6 +92,6 @@ return [
     |
     */
     'domain' => env('NETOPIA_ROUTE_DOMAIN'),
-    'route_prefix' => 'netopia',
+    'route_prefix' => env('NETOPIA_ROUTE_PREFIX', 'netopia'),
     'route_middleware' => ['web'],
 ];
