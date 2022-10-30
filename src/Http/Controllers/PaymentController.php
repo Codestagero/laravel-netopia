@@ -2,22 +2,41 @@
 
 namespace Codestage\Netopia\Http\Controllers;
 
+use Codestage\Netopia\Contracts\PaymentService;
+use Codestage\Netopia\Entities\PaymentResult;
+use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
 use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Config, Response};
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\{RedirectResponse, Request, Response};
+use Illuminate\Support\Facades\{Config};
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
+use function in_array;
 
 class PaymentController
 {
+    /**
+     * PaymentController constructor method.
+     *
+     * @param PaymentService $_paymentService
+     * @param ResponseFactory $_responseFactory
+     */
+    public function __construct(
+        private readonly PaymentService $_paymentService,
+        private readonly ResponseFactory $_responseFactory
+    ) {
+    }
+
     /**
      * Redirect the user to a payment URL.
      *
      * @param Request $request
      * @throws Exception
-     * @return \Illuminate\Http\Response
+     * @throws Throwable
+     * @return RedirectResponse|Response
      */
-    public function __invoke(Request $request): \Illuminate\Http\Response
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         $id = $request->route('payment');
 
@@ -25,11 +44,24 @@ class PaymentController
         $payment = Payment::query()->findOrFail($id);
 
         // Check if this payment needs more steps
-        if (!\in_array($payment->status, Config::get('netopia.payable_statuses'))) {
+        if (!in_array($payment->status, Config::get('netopia.payable_statuses'))) {
             throw new HttpException(403);
         }
 
-        return Response::view('netopia::execute_payment', [
+        // If this payment actually has an amount lower than or equal to 0, we can skip the payment
+        if ($payment->amount <= 0) {
+            // Update the payment status
+            $this->_paymentService->executePaymentResult($payment, new PaymentResult([
+                'newStatus' => PaymentStatus::Confirmed,
+                'paymentId' => $payment->getKey()
+            ]));
+
+            // Redirect to the success page
+            return $this->_responseFactory->redirectToRoute('netopia.ipn');
+        }
+
+        // Redirect the user to the payment URL
+        return $this->_responseFactory->view('netopia::execute_payment', [
             'payment' => $payment->encrypt()
         ]);
     }
