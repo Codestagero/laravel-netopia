@@ -3,8 +3,8 @@
 namespace Codestage\Netopia\Tests;
 
 use Codestage\Netopia\Providers\NetopiaServiceProvider;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Config;
 use Mockery;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
@@ -27,8 +27,10 @@ abstract class TestCase extends OrchestraTestCase
     {
         parent::setUp();
         $this->app->setBasePath(__DIR__ . '/../');
-        Config::set('netopia.certificate_path.public', base_path('certificates/' . env('NETOPIA_PUBLIC_FILE', 'netopia.cer')));
-        Config::set('netopia.certificate_path.secret', base_path('certificates/' . env('NETOPIA_SECRET_FILE', 'netopia.key')));
+
+        $configuration = $this->app->make(Repository::class);
+        $configuration->set('netopia.certificate_path.public', base_path('certificates/' . env('NETOPIA_PUBLIC_FILE', 'netopia.cer')));
+        $configuration->set('netopia.certificate_path.secret', base_path('certificates/' . env('NETOPIA_SECRET_FILE', 'netopia.key')));
 
         $this->setUpFaker();
     }

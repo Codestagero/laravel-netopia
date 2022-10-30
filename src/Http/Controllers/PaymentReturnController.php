@@ -4,9 +4,9 @@ namespace Codestage\Netopia\Http\Controllers;
 
 use Codestage\Netopia\Contracts\PaymentService;
 use Codestage\Netopia\Models\Payment;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Database\Eloquent\{ModelNotFoundException};
 use Illuminate\Http\{Request, Response as PlainResponse};
-use Illuminate\Support\Facades\{Response};
 use Throwable;
 
 class PaymentReturnController
@@ -14,7 +14,7 @@ class PaymentReturnController
     /**
      * PaymentReturnController constructor method.
      */
-    public function __construct()
+    public function __construct(private readonly ResponseFactory $_responseFactory)
     {
     }
 
@@ -25,7 +25,7 @@ class PaymentReturnController
      */
     public function success(): PlainResponse
     {
-        return Response::view('netopia::payment_success');
+        return $this->_responseFactory->view('netopia::payment_success');
     }
 
     /**
@@ -55,7 +55,7 @@ class PaymentReturnController
         $paymentService->executePaymentResult($payment, $ipn);
 
         // Return a payment result XML
-        return Response::view('netopia::payment_result', [
+        return $this->_responseFactory->view('netopia::payment_result', [
             'result' => $ipn
         ])->withHeaders([
             'Content-Type' => 'application/xml'
