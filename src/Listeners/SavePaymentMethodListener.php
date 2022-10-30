@@ -5,11 +5,18 @@ namespace Codestage\Netopia\Listeners;
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Events\PaymentStatusChangedEvent;
 use Codestage\Netopia\Models\PaymentMethod;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Log\LogManager;
 use Throwable;
 
 class SavePaymentMethodListener
 {
+    /**
+     * @param LogManager $_logManager
+     */
+    public function __construct(private readonly LogManager $_logManager)
+    {
+    }
+
     /**
      * Save the payment method on a successful payment with the correct flag.
      *
@@ -20,7 +27,7 @@ class SavePaymentMethodListener
     public function handle(PaymentStatusChangedEvent $event): void
     {
         if ($event->newStatus === PaymentStatus::Confirmed) {
-            Log::debug('Payment status changed', [
+            $this->_logManager->debug('Payment status changed', [
                 'payment' => $event->payment,
                 'result' => $event->result
             ]);
@@ -42,7 +49,7 @@ class SavePaymentMethodListener
                 if ($event->payment->paymentMethod->isDirty()) {
                     $event->payment->paymentMethod->save();
 
-                    Log::debug('Payment method updated', [
+                    $this->_logManager->debug('Payment method updated', [
                         'payment_method' => $event->payment->paymentMethod->getKey(),
                         'payment' => $event->payment->paymentMethod->getKey()
                     ]);
@@ -60,12 +67,12 @@ class SavePaymentMethodListener
 
                     $paymentMethod->saveOrFail();
 
-                    Log::debug('Payment method saved', [
+                    $this->_logManager->debug('Payment method saved', [
                         'payment_method' => $paymentMethod->getKey(),
                         'payment' => $event->payment->getKey()
                     ]);
                 } else {
-                    Log::warning('Payment method does not have enough info to be saved.', [
+                    $this->_logManager->warning('Payment method does not have enough info to be saved.', [
                         'event' => $event
                     ]);
                 }

@@ -7,12 +7,11 @@ use Codestage\Netopia\Entities\PaymentResult;
 use Codestage\Netopia\Enums\PaymentStatus;
 use Codestage\Netopia\Models\Payment;
 use Exception;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\{RedirectResponse, Request, Response};
-use Illuminate\Support\Facades\{Config};
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
-use function in_array;
 
 class PaymentController
 {
@@ -21,10 +20,12 @@ class PaymentController
      *
      * @param PaymentService $_paymentService
      * @param ResponseFactory $_responseFactory
+     * @param Repository $_configuration
      */
     public function __construct(
         private readonly PaymentService $_paymentService,
-        private readonly ResponseFactory $_responseFactory
+        private readonly ResponseFactory $_responseFactory,
+        private readonly Repository $_configuration
     ) {
     }
 
@@ -44,7 +45,7 @@ class PaymentController
         $payment = Payment::query()->findOrFail($id);
 
         // Check if this payment needs more steps
-        if (!in_array($payment->status, Config::get('netopia.payable_statuses'))) {
+        if (!\in_array($payment->status, $this->_configuration->get('netopia.payable_statuses'))) {
             throw new HttpException(403);
         }
 
