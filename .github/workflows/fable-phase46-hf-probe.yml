@@ -1,0 +1,63 @@
+name: fable-phase46-hf-probe
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/fable-phase46-hf-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe Crypto-top40 freshness
+        run: |
+          pip install pandas pyarrow huggingface_hub
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+          from huggingface_hub import hf_hub_download, list_repo_files
+
+          repo = 'Crypt-dataset/Crypto-top40'
+          files = list_repo_files(repo, repo_type='dataset')
+          kline_files = sorted(f for f in files if f.startswith('klines/') and f.endswith('.parquet'))
+          funding_files = sorted(f for f in files if f.startswith('funding/') and f.endswith('.parquet'))
+          kp = hf_hub_download(repo, 'klines/BTCUSDT.parquet', repo_type='dataset')
+          fp = hf_hub_download(repo, 'funding/BTCUSDT.parquet', repo_type='dataset')
+          k = pd.read_parquet(kp, columns=['open_time'])
+          f = pd.read_parquet(fp, columns=['funding_time'])
+          result = {
+              'files_total': len(files),
+              'kline_symbols': len(kline_files),
+              'funding_symbols': len(funding_files),
+              'btc_kline_min': str(pd.to_datetime(k['open_time'], unit='ms', utc=True, errors='coerce').min()),
+              'btc_kline_max': str(pd.to_datetime(k['open_time'], unit='ms', utc=True, errors='coerce').max()),
+              'btc_funding_min': str(pd.to_datetime(f['funding_time'], unit='ms', utc=True, errors='coerce').min()),
+              'btc_funding_max': str(pd.to_datetime(f['funding_time'], unit='ms', utc=True, errors='coerce').max()),
+              'kline_files': kline_files,
+              'funding_files': funding_files,
+          }
+          Path('hf_probe').mkdir(exist_ok=True)
+          Path('hf_probe/probe.json').write_text(json.dumps(result, indent=2) + '\n')
+          print(json.dumps({k:v for k,v in result.items() if not k.endswith('_files')}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fable-phase46-hf-probe
+          path: hf_probe
+          retention-days: 7
+          if-no-files-found: warn
