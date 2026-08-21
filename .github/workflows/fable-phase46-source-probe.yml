@@ -1,0 +1,60 @@
+name: fable-phase46-source-probe
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/fable-phase46-source-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      - name: Probe accessible public sources
+        run: |
+          set -u
+          mkdir -p source_probe
+          python - <<'PY'
+          import json, time, zipfile, io
+          from pathlib import Path
+          import urllib.request, urllib.error
+
+          urls = {
+            'vision_btc_daily': 'https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1d/BTCUSDT-1d-2026-08-20.zip',
+            'pipai_active': 'https://api.pipai.org/ticker/24hr/active',
+            'pipai_funding_history': 'https://api.pipai.org/funding/rates/BTCUSDT/history?start_time=1786924800000&limit=50',
+            'pipai_funding_current': 'https://api.pipai.org/funding/rates/BTCUSDT',
+            'spot_market_data': 'https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT',
+          }
+          result = {}
+          for name,url in urls.items():
+            try:
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(req,timeout=45) as r:
+                body=r.read()
+                result[name]={'status':r.status,'bytes':len(body),'content_type':r.headers.get('content-type'),'prefix':body[:250].decode('utf-8','replace')}
+                if name=='vision_btc_daily':
+                  with zipfile.ZipFile(io.BytesIO(body)) as z:
+                    result[name]['members']=z.namelist()
+                    result[name]['csv']=z.read(z.namelist()[0]).decode('utf-8','replace')[:500]
+            except Exception as exc:
+              result[name]={'error':repr(exc)}
+          Path('source_probe/probe.json').write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fable-phase46-source-probe
+          path: source_probe
+          retention-days: 7
+          if-no-files-found: warn
