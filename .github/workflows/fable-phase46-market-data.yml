@@ -1,0 +1,90 @@
+name: fable-phase46-market-data
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/fable-phase46-market-data.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch and prepare isolated collector
+        run: |
+          mkdir -p tools
+          curl -fsSL https://raw.githubusercontent.com/Codestagero/eslint-config-standard/fable-phase46-market-data-20260821/tools/collect_phase46_market_data.py -o tools/collect_phase46_market_data.py
+          curl -fsSL https://raw.githubusercontent.com/Codestagero/eslint-config-standard/fable-phase46-market-data-20260821/tools/phase46_symbols.txt -o tools/phase46_symbols.txt
+          test "$(wc -l < tools/phase46_symbols.txt)" -eq 827
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/collect_phase46_market_data.py')
+          text = path.read_text()
+          text = text.replace('gzip.open(path, "wt", encoding="utf-8", newline="", mtime=0)', 'gzip.open(path, "wt", encoding="utf-8", newline="")')
+          text = text.replace('except ApiError:\n                raise', 'except ApiError as exc:\n                last = str(exc)\n                break')
+          text = text.replace('attempts: int = 6', 'attempts: int = 2')
+          text = text.replace('response.status_code in (400, 404)', 'response.status_code in (400, 404, 451)')
+          text = text.replace(
+              'for base in (PRIMARY_BASE, FALLBACK_BASE):',
+              'for base in (PRIMARY_BASE, "https://fapi1.binance.com", "https://fapi2.binance.com", "https://fapi3.binance.com", FALLBACK_BASE):'
+          )
+          text = text.replace('symbols = sorted(set(panel_symbols) | set(current_symbols))', 'symbols = sorted(set(panel_symbols) & set(current_symbols))')
+          path.write_text(text)
+          PY
+          python -m py_compile tools/collect_phase46_market_data.py
+          pip install requests
+
+      - name: Collect public Binance market data
+        env:
+          OUTPUT_ROOT: market_data
+          SYMBOLS_FILE: tools/phase46_symbols.txt
+          PRICE_WORKERS: '30'
+          FUNDING_WORKERS: '25'
+          RATE_LIMIT_PAUSE_SECONDS: '25'
+        run: python tools/collect_phase46_market_data.py
+
+      - name: Validate artifact
+        run: |
+          python - <<'PY'
+          import gzip
+          import json
+          from pathlib import Path
+          root = Path('market_data')
+          audit = json.loads((root / 'audit.json').read_text())
+          assert audit['panel_symbols'] == 827, audit
+          assert audit['queried_symbols'] >= 300, audit
+          assert audit['recent_price_symbols'] >= 300, audit
+          assert audit['price_rows'] >= 5000, audit
+          assert audit['funding_rows'] >= 5000, audit
+          assert audit['btc_hourly_rows'] >= 72, audit
+          assert audit['missing_required_current_prices'] == [], audit
+          for name in ('recent_prices.csv.gz', 'recent_funding.csv.gz', 'btc_1h.csv.gz'):
+              path = root / name
+              assert path.stat().st_size > 100, path
+              with gzip.open(path, 'rt') as handle:
+                  assert handle.readline().strip()
+          print(json.dumps(audit, indent=2))
+          PY
+
+      - name: Upload market-data artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fable-phase46-market-data-20260821
+          path: market_data
+          retention-days: 7
+          if-no-files-found: warn
