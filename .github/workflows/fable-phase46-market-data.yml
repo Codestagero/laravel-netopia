@@ -36,7 +36,12 @@ jobs:
           text = path.read_text()
           text = text.replace('gzip.open(path, "wt", encoding="utf-8", newline="", mtime=0)', 'gzip.open(path, "wt", encoding="utf-8", newline="")')
           text = text.replace('except ApiError:\n                raise', 'except ApiError as exc:\n                last = str(exc)\n                break')
-          text = text.replace('attempts: int = 6', 'attempts: int = 3')
+          text = text.replace('attempts: int = 6', 'attempts: int = 2')
+          text = text.replace('response.status_code in (400, 404)', 'response.status_code in (400, 404, 451)')
+          text = text.replace(
+              'for base in (PRIMARY_BASE, FALLBACK_BASE):',
+              'for base in (PRIMARY_BASE, "https://fapi1.binance.com", "https://fapi2.binance.com", "https://fapi3.binance.com", FALLBACK_BASE):'
+          )
           text = text.replace('symbols = sorted(set(panel_symbols) | set(current_symbols))', 'symbols = sorted(set(panel_symbols) & set(current_symbols))')
           path.write_text(text)
           PY
